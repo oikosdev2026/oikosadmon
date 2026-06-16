@@ -3,12 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Oikos Admon v3.5 — Studio Pro Enterprise</title>
+<title>Oikos Admon v4.0 — Studio Pro Enterprise</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<!-- Librería para exportación nativa a PDF con calidad de impresión profesional -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, set, get, onValue, push, update, query, orderByKey, limitToLast, startAfter } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, set, get, onValue, push, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   const firebaseConfig = {
@@ -29,14 +31,12 @@
   window._fbDB  = db; window._fbRef = ref; window._fbSet = set; window._fbGet = get;
   window._fbOnValue = onValue; window._fbAuth = auth; window._fbSignIn = signInWithEmailAndPassword;
   window._fbSignOut = signOut; window._fbOnAuth = onAuthStateChanged; window._fbPush = push; window._fbUpdate = update;
-  window._fbQuery = query; window._fbOrderByKey = orderByKey; window._fbLimitToLast = limitToLast; window._fbStartAfter = startAfter;
   window.dispatchEvent(new Event('firebase-ready'));
 </script>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0;transition:background 0.2s, border-color 0.2s, color 0.2s}
 
-/* SITEMA DE TEMAS (DYNAMIC PALETTE) */
 :root[data-theme="dark"] {
   --bg: #0a0a0f; --bg2: #12121a; --bg3: #1a1a26; --bg4: #22223a;
   --border: #2a2a42; --border2: #3a3a58;
@@ -44,7 +44,6 @@
   --accent: #6c63ff; --accent2: #8b7fff; --accent3: #2d2860;
   --green: #22c55e; --red: #ef4444; --amber: #f59e0b; --blue: #3b82f6; --purple: #a855f7;
   --green-bg: rgba(34,197,94,.12); --red-bg: rgba(239,68,68,.12);
-  --amber-bg: rgba(245,158,11,.12); --blue-bg: rgba(59,130,246,.12);
   --shadow: rgba(0,0,0,0.5);
 }
 :root[data-theme="light"] {
@@ -54,267 +53,292 @@
   --accent: #534bae; --accent2: #6c63ff; --accent3: #e8e7ff;
   --green: #16a34a; --red: #dc2626; --amber: #d97706; --blue: #2563eb; --purple: #9333ea;
   --green-bg: rgba(22,163,74,.1); --red-bg: rgba(220,38,38,.1);
-  --amber-bg: rgba(217,119,6,.1); --blue-bg: rgba(37,99,235,.1);
   --shadow: rgba(100,100,120,0.15);
 }
 
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 
-/* LOGIN */
 #login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000}
 #login-screen.hidden{display:none}
-.login-box{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:40px;width:380px;max-width:95vw;box-shadow:0 10px 25px var(--shadow)}
-.login-logo{font-size:22px;font-weight:700;color:var(--accent2);margin-bottom:4px}
-.login-sub{font-size:13px;color:var(--text2);margin-bottom:28px}
-.login-err{background:var(--red-bg);border:1px solid var(--red);color:var(--red);border-radius:6px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+.login-box{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:40px;width:380px;box-shadow:0 10px 25px var(--shadow)}
+.login-logo{font-size:22px;font-weight:700;color:var(--accent2)}
 
-/* LOADING */
 #loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px}
 #loading-screen.hidden{display:none}
 .loader{width:40px;height:40px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.load-text{font-size:14px;color:var(--text2)}
 
-/* NAV BAR */
 #nav{position:fixed;top:0;left:0;bottom:0;width:224px;background:var(--bg2);border-right:1px solid var(--border);z-index:100;overflow-y:auto;padding:20px 0;display:none}
 #nav.visible{display:block}
 .nav-logo{padding:0 20px 10px;font-size:15px;font-weight:600;color:var(--accent2)}
-.nav-logo span{display:block;font-size:11px;color:var(--text2);font-weight:400;margin-top:2px}
-.sync-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 7px;background:var(--green-bg);color:var(--green);border-radius:4px;margin-top:5px}
+.nav-logo span{display:block;font-size:11px;color:var(--text2);font-weight:400}
 .nav-user{font-size:11px;color:var(--text2);padding:10px 20px 16px;border-bottom:1px solid var(--border);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
 .nav-section{padding:12px 20px 4px;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);font-weight:700}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;font-size:13px;color:var(--text2);font-weight:500;transition:all .15s;border-left:2px solid transparent}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;font-size:13px;color:var(--text2);font-weight:500}
 .nav-item:hover{background:var(--bg3);color:var(--text)}
-.nav-item.active{background:var(--accent3);color:var(--accent);border-left-color:var(--accent)}
+.nav-item.active{background:var(--accent3);color:var(--accent);border-left:2px solid var(--accent)}
 
-/* TEMA TOGGLE */
 .theme-switch{padding:0 20px 10px;display:flex;align-items:center;justify-content:space-between}
-.theme-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:20px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.theme-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:20px;font-size:11px;cursor:pointer}
 
-/* MAIN */
 #main{margin-left:224px;padding:24px;min-height:100vh;display:none}
 #main.visible{display:block}
 .page{display:none}.page.active{display:block}
-.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap}
 .page-title{font-size:20px;font-weight:600}
 
-/* CARDS & CONTAINERS */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:14px;margin-bottom:24px}
 .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:0 2px 8px var(--shadow)}
-.stat-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;font-weight:600}
-.stat-val{font-size:22px;font-weight:600;line-height:1}
-.stat-val.green{color:var(--green)}.stat-val.red{color:var(--red)}.stat-val.amber{color:var(--amber)}.stat-val.blue{color:var(--blue)}.stat-val.purple{color:var(--purple)}
+.stat-label{font-size:11px;color:var(--text2);text-transform:uppercase;margin-bottom:8px;font-weight:700}
+.stat-val{font-size:22px;font-weight:600}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;box-shadow:0 2px 10px var(--shadow)}
-.card-title{font-size:14px;font-weight:600;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;color:var(--text)}
+.card-title{font-size:14px;font-weight:600;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
 
-/* TABLES */
 .table-wrap{overflow-x:auto;border-radius:6px;border:1px solid var(--border);margin-bottom:10px;background:var(--bg2)}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{background:var(--bg3);color:var(--text);font-weight:600;padding:12px 14px;text-align:left;font-size:11px;text-transform:uppercase;white-space:nowrap;border-bottom:2px solid var(--border)}
-td{padding:12px 14px;border-top:1px solid var(--border);color:var(--text);vertical-align:middle}
-tr:hover td{background:var(--bg3)}
+th{background:var(--bg3);color:var(--text);font-weight:600;padding:12px 14px;text-align:left;font-size:11px;text-transform:uppercase}
+td{padding:12px 14px;border-top:1px solid var(--border);color:var(--text)}
 
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:600}
 .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent2)}
-.btn-sm{padding:5px 10px;font-size:12px;border-radius:4px}
+.btn-sm{padding:5px 10px;font-size:12px}
 .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border)}.btn-ghost:hover{background:var(--bg3)}
 .btn-danger{background:var(--red-bg);color:var(--red);border:1px solid var(--red)}
 .btn-success{background:var(--green-bg);color:var(--green);border:1px solid var(--green)}
 
-/* BADGES */
-.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;text-transform:capitalize}
-.badge-green{background:var(--green-bg);color:var(--green)}.badge-red{background:var(--red-bg);color:var(--red)}.badge-amber{background:var(--amber-bg);color:var(--amber)}.badge-blue{background:var(--blue-bg);color:var(--blue)}
-.chip{display:inline-flex;align-items:center;padding:3px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;font-size:11px;color:var(--text);font-weight:500}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.badge-green{background:var(--green-bg);color:var(--green)}.badge-red{background:var(--red-bg);color:var(--red)}.badge-amber{background:var(--amber-bg);color:var(--amber)}
 
-/* MODALS */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(2px);z-index:200;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.open{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:28px;width:560px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 15px 35px rgba(0,0,0,0.35)}
-.modal h3{font-size:16px;font-weight:700;margin-bottom:20px;color:var(--text);border-bottom:1px solid var(--border);padding-bottom:10px}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.form-group{margin-bottom:12px}
-label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:600}
-input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:6px;font-size:13px;outline:none;font-family:inherit}
-input:focus,select:focus,textarea:focus{border-color:var(--accent2)}
-.form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:28px;width:680px;max-width:100%;max-height:90vh;overflow-y:auto}
 
-/* KANBAN */
-.kanban-board{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;align-items:start}
-.kanban-col{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;min-height:450px;box-shadow:0 2px 5px var(--shadow)}
-.kanban-col-title{font-size:12px;font-weight:700;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;color:var(--text2)}
-.kanban-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;cursor:grab;box-shadow:0 2px 4px var(--shadow)}
-.kanban-card:hover{border-color:var(--accent)}
+.kanban-board{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.kanban-col{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;min-height:400px}
+.kanban-col-title{font-size:12px;font-weight:700;margin-bottom:14px;display:flex;justify-content:space-between}
+.kanban-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;cursor:pointer}
 
-/* AUDIT Log */
-.audit-feed{font-size:12px;color:var(--text2);background:var(--bg3);border-radius:6px;padding:10px;margin-top:14px;max-height:150px;overflow-y:auto;border:1px solid var(--border)}
-.audit-item{border-bottom:1px solid var(--border);padding:6px 0;line-height:1.4}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:900px){.kanban-board{grid-template-columns:1fr}.grid-2{grid-template-columns:1fr}#main{margin-left:0}#nav{display:none}}
+/* COMPONENTE DE PREVISUALIZACIÓN DE IMPRESIÓN EDITORIAL (PDF A4) */
+.pdf-preview-box {
+  background: #ffffff !important;
+  color: #1a1a1a !important;
+  padding: 50px;
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  box-shadow: 0 0 20px rgba(0,0,0,0.15);
+}
+.pdf-header { display: flex; justify-content: space-between; border-bottom: 2px solid #6c63ff; padding-bottom: 20px; margin-bottom: 30px; }
+.pdf-title-doc { font-size: 24px; font-weight: 800; color: #1a1a1a; text-transform: uppercase; letter-spacing: 1px; }
+.pdf-meta-table { width: 100%; margin-bottom: 25px; font-size: 12px; }
+.pdf-meta-table td { padding: 5px; border: none !important; color: #444 !important; }
+.pdf-grid-details { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; background: #f8f9fa; padding: 15px; border-radius: 6px; font-size: 12px; }
+.pdf-table { width: 100%; margin-bottom: 30px; }
+.pdf-table th { background: #1a1a1a !important; color: #ffffff !important; font-size: 11px; padding: 10px; }
+.pdf-table td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0 !important; color: #222 !important; font-size: 12px; }
+.pdf-totals { float: right; width: 250px; margin-top: 10px; font-size: 13px; }
+.pdf-totals-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e2e8f0; }
+.pdf-cintillo-legal { margin-top: 60px; border-top: 1px dashed #ef4444; padding-top: 15px; color: #dc2626; text-align: center; font-weight: 700; font-size: 11px; letter-spacing: 0.5px; }
 </style>
 </head>
 <body data-theme="dark">
 
+<!-- PANTALLA SEGURA -->
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">🎬 Oikos Admon</div>
-    <div class="login-sub">Administración Central Enterprise</div>
+    <div class="login-sub">Console Enterprise Studio</div>
     <div class="login-err" id="login-err"></div>
-    <div class="form-group"><label>Correo Corporativo</label><input type="email" id="login-email" placeholder="usuario@oikos.media"></div>
-    <div class="form-group"><label>Contraseña</label><input type="password" id="login-pass" placeholder="••••••••"></div>
-    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doLogin()">Autenticar Ingreso</button>
+    <div class="form-group"><label>Email Corporativo</label><input type="email" id="login-email"></div>
+    <div class="form-group"><label>Contraseña</label><input type="password" id="login-pass"></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doLogin()">Autenticar</button>
   </div>
 </div>
 
 <div id="loading-screen" class="hidden">
   <div class="loader"></div>
-  <div class="load-text">Estableciendo canal Websocket en tiempo real...</div>
+  <div class="load-text">Estructurando Célula Madre de Datos...</div>
 </div>
 
+<!-- NAVEGACIÓN -->
 <nav id="nav">
-  <div class="nav-logo">Oikos Admon<span>Studio Control Platform</span></div>
-  
+  <div class="nav-logo">Oikos Admon<span>Studio Control</span></div>
   <div class="theme-switch">
-    <span style="font-size:11px;color:var(--text2);font-weight:600">Apariencia:</span>
-    <button class="theme-btn" onclick="toggleVisualTheme()">
-      <span id="theme-btn-icon">☀️</span> <span id="theme-btn-text">Claro</span>
-    </button>
+    <span style="font-size:11px;color:var(--text2)">Visualización:</span>
+    <button class="theme-btn" onclick="toggleVisualTheme()">Tema</button>
   </div>
-
-  <div class="nav-user"><span id="nav-user-email">Cargando firma...</span><button class="btn btn-ghost btn-sm" onclick="doLogout()">⏻</button></div>
+  <div class="nav-user"><span id="nav-user-email">...</span><button class="btn btn-ghost btn-sm" onclick="doLogout()">⏻</button></div>
 
   <div class="nav-section">Operaciones</div>
-  <div class="nav-item active" onclick="goto('dashboard')">Dashboard Analítico</div>
+  <div class="nav-item active" onclick="goto('dashboard')">Dashboard</div>
+  <div class="nav-item" onclick="goto('proyectos_cotizados')">Proyectos Cotizados (Core)</div>
   <div class="nav-item" onclick="goto('clientes')">Clientes (CRM)</div>
-  <div class="nav-item" onclick="goto('ordenes')">Órdenes de Servicio</div>
   <div class="nav-item" onclick="goto('kanban')">Tablero Kanban</div>
-  
-  <div class="nav-section">Finanzas &amp; Caja</div>
   <div class="nav-item" onclick="goto('movimientos')">Flujo de Caja</div>
-  <div class="nav-item" onclick="goto('costos')">Costos Operativos</div>
-  <div class="nav-item" onclick="goto('personal')">Equipo de Trabajo</div>
-  <div class="nav-item" onclick="goto('config_servicios')">Catálogo Servicios</div>
-  <div class="nav-item" onclick="goto('historial_auditoria')">Logs de Auditoría</div>
+  <div class="nav-item" onclick="goto('historial_auditoria')">Logs de Sistema</div>
 </nav>
 
+<!-- CONTENEDOR PRINCIPAL -->
 <main id="main">
   
+  <!-- DASHBOARD -->
   <div id="page-dashboard" class="page active">
-    <div class="page-header">
-      <div><div class="page-title">Métricas de Rendimiento</div></div>
-      <div class="flex gap-2"><span id="tasa-display" class="chip">Tasa: $1 = Bs 0</span><button class="btn btn-ghost btn-sm" onclick="openModal('modal-tasa')">Actualizar Tasa</button></div>
-    </div>
+    <div class="page-header"><div class="page-title">Métricas Consolidadas</div></div>
     <div class="stats-grid" id="dash-stats"></div>
     <div class="grid-2">
-      <div class="card"><div class="card-title">Balance de Caja Consolidado (USD)</div><div class="chart-wrap" style="position:relative;height:240px"><canvas id="chart-flujo"></canvas></div></div>
-      <div class="card"><div class="card-title">Distribución / Rentabilidad por Servicio</div><div class="chart-wrap" style="position:relative;height:240px"><canvas id="chart-servicios-rent"></canvas></div></div>
+      <div class="card"><div class="card-title">Balance Monetario (USD)</div><div style="position:relative;height:220px"><canvas id="chart-flujo"></canvas></div></div>
+      <div class="card"><div class="card-title">Pipeline por Línea de Servicio</div><div style="position:relative;height:220px"><canvas id="chart-servicios-rent"></canvas></div></div>
     </div>
   </div>
 
+  <!-- PROYECTOS COTIZADOS (CELULA MADRE CORE) -->
+  <div id="page-proyectos_cotizados" class="page">
+    <div class="page-header">
+      <div class="page-title">Proyectos Cotizados — "Célula Madre"</div>
+      <button class="btn btn-primary" onclick="prepareNewProyecto()">+ Crear Proyecto / Cotización</button>
+    </div>
+    <div class="card">
+      <div class="table-wrap" id="proyectos-table-wrap"></div>
+    </div>
+  </div>
+
+  <!-- CRM CLIENTES -->
   <div id="page-clientes" class="page">
-    <div class="page-header">
-      <div><div class="page-title">Base de Datos de Clientes</div></div>
-      <button class="btn btn-primary" onclick="prepareNewCliente()">+ Agregar Cliente</button>
-    </div>
-    <div id="clientes-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px"></div>
+    <div class="page-header"><div><div class="page-title">Fichas CRM Clientes</div></div><button class="btn btn-primary" onclick="prepareNewCliente()">+ Nuevo Cliente</button></div>
+    <div id="clientes-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px"></div>
   </div>
 
-  <div id="page-ordenes" class="page">
-    <div class="page-header">
-      <div><div class="page-title">Listado de Contratos y Órdenes</div></div>
-      <button class="btn btn-primary" onclick="prepareNewOS()">+ Abrir Nueva OS</button>
-    </div>
-    <div id="os-list"></div>
-  </div>
-
+  <!-- KANBAN -->
   <div id="page-kanban" class="page">
-    <div class="page-header"><div><div class="page-title">Línea de Producción (Kanban)</div></div></div>
+    <div class="page-header"><div><div class="page-title">Pipeline Kanban de Servicios</div></div></div>
     <div class="kanban-board" id="kanban-board"></div>
   </div>
 
+  <!-- MOVIMIENTOS -->
   <div id="page-movimientos" class="page">
-    <div class="page-header">
-      <div><div class="page-title">Historial Completo de Caja</div></div>
-      <div class="flex gap-2">
-        <button class="btn btn-primary" onclick="prepareNewMovimiento()">+ Crear Registro</button>
-        <button class="btn btn-ghost" onclick="exportMovimientosExcel()">⬇ Exportar Excel Comercial</button>
-      </div>
-    </div>
-    <div class="card">
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px">
-        <div><label>Filtrar Flujo</label><select id="f-mov-tipo" onchange="renderMovimientos()"><option value="">Todos</option><option value="ingreso">Ingresos</option><option value="egreso">Egresos</option></select></div>
-        <div><label>Concepto de Servicio</label><select id="f-mov-servicio" onchange="renderMovimientos()"><option value="">Todos</option></select></div>
-        <div><label>Asignación Cliente</label><select id="f-mov-cliente" onchange="renderMovimientos()"><option value="">Todos</option></select></div>
-        <div><label>Segmentación Mes</label><input type="month" id="f-mov-mes" onchange="renderMovimientos()"></div>
-      </div>
-      <div class="table-wrap" id="movimientos-table-wrap"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
-        <button class="btn btn-ghost btn-sm" id="btn-prev-page" onclick="prevPageMovs()">Bloque Anterior</button>
-        <span id="page-indicator" style="font-size:12px;color:var(--text2);font-weight:600">Página 1</span>
-        <button class="btn btn-ghost btn-sm" id="btn-next-page" onclick="nextPageMovs()">Bloque Siguiente</button>
-      </div>
-    </div>
+    <div class="page-header"><div><div class="page-title">Caja y Transacciones</div></div></div>
+    <div class="card"><div class="table-wrap" id="movimientos-table-wrap"></div></div>
   </div>
 
-  <div id="page-costos" class="page">
-    <div class="page-header"><div><div class="page-title">Costos Operativos</div></div><button class="btn btn-primary" onclick="prepareNewCosto()">+ Registrar Gasto</button></div>
-    <div class="card"><div class="table-wrap" id="costos-table-wrap"></div></div>
-  </div>
-
-  <div id="page-personal" class="page">
-    <div class="page-header"><div><div class="page-title">Nómina de Equipo</div></div><button class="btn btn-primary" onclick="prepareNewPersonal()">+ Alta Personal</button></div>
-    <div class="card"><div class="table-wrap" id="personal-table-wrap"></div></div>
-  </div>
-
-  <div id="page-config_servicios" class="page">
-    <div class="page-header"><div><div class="page-title">Estructura del Catálogo Técnico</div></div></div>
-    <div class="card">
-      <div class="form-group"><label>Crear Nueva Categoría Comercial de Servicio</label><input type="text" id="new-servicio-option-name" placeholder="Ej: Pauta Corporativa Premium"><button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="addServicioOption()">Inyectar Opción</button></div>
-      <div style="margin-top:20px" id="config-servicios-list"></div>
-    </div>
-  </div>
-
+  <!-- AUDITORIA -->
   <div id="page-historial_auditoria" class="page">
-    <div class="page-header"><div><div class="page-title">Trazabilidad del Sistema (Audit Trail)</div></div></div>
+    <div class="page-header"><div><div class="page-title">Audit Log Trail</div></div></div>
     <div class="card"><div class="table-wrap" id="auditoria-table-wrap"></div></div>
   </div>
 </main>
 
-<div class="modal-overlay" id="modal-tasa"><div class="modal" style="width:340px"><h3>Tasa Financiera</h3><div class="form-group"><label>Valor BCV / Mercado de 1 USD en Bs</label><input type="number" id="tasa-input" step="0.01"></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-tasa')">Cerrar</button><button class="btn btn-primary" onclick="saveTasa()">Establecer Valor</button></div></div></div>
+<!-- MODALS -->
+<!-- MODAL CENTRAL: CÉLULA MADRE DE PROYECTO -->
+<div class="modal-overlay" id="modal-proyecto"><div class="modal" style="width:850px">
+  <h3>Estructura "Célula Madre" del Proyecto</h3>
+  <input type="hidden" id="proy-id">
+  
+  <h4 style="margin:10px 0; color:var(--accent2)">1. Metadatos &amp; Cliente</h4>
+  <div class="form-row">
+    <div class="form-group"><label>ID Proyecto</label><input type="text" id="proy-meta-id" placeholder="PROY-2026-XXXX"></div>
+    <div class="form-group"><label>Asesor / Consultor</label><input type="text" id="proy-meta-asesor"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>Cliente Titular</label>
+      <select id="proy-cli-select"></select>
+      <button class="btn btn-success btn-sm" style="margin-top:6px;width:100%;justify-content:center" onclick="openFastClienteModal()">+ Registrar Nuevo Cliente Express</button>
+    </div>
+    <div class="form-group"><label>Contacto Directo</label><input type="text" id="proy-cli-contacto"></div>
+  </div>
 
-<div class="modal-overlay" id="modal-cliente"><div class="modal"><h3>Ficha Maestra del Cliente</h3><input type="hidden" id="cli-id"><div class="form-row"><div class="form-group"><label>Razón Social / Nombre Comercial</label><input type="text" id="cli-nombre"></div><div class="form-group"><label>Sector de Industria</label><input type="text" id="cli-sector"></div></div><div class="form-row"><div class="form-group"><label>Email Corporativo</label><input type="email" id="cli-email"></div><div class="form-group"><label>Teléfono Enlace</label><input type="text" id="cli-telefono"></div></div><div class="form-group"><label>Identificación Fiscal (RIF)</label><input type="text" id="cli-rif"></div><div class="form-group"><label>Estado del Cliente</label><select id="cli-estado"><option value="activo">Activo Comercial</option><option value="inactivo">Inactivo / Bloqueado</option></select></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-cliente')">Cancelar</button><button class="btn btn-danger" id="btn-eliminar-cliente" onclick="deleteClienteAction()">Eliminar Archivo</button><button class="btn btn-primary" onclick="saveClienteAction()">Guardar Cambios</button></div></div></div>
+  <h4 style="margin:15px 0; color:var(--accent2)">2. Especificaciones Técnicas y de Pauta</h4>
+  <div class="form-row">
+    <div class="form-group"><label>Línea de Servicio / Concepto</label><input type="text" id="proy-tech-linea" placeholder="Ej: Video Corporativo, Pauta Streaming"></div>
+    <div class="form-group"><label>Tiempo de Pauta / Duración</label><input type="text" id="proy-tech-pauta" placeholder="Ej: 30 segundos, 4 horas continuas"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label>Jornadas Totales</label><input type="number" id="proy-tech-jornadas" value="1"></div>
+    <div class="form-group"><label>Fecha de Ejecución / Evento</label><input type="date" id="proy-tech-fecha"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label>Horario</label><input type="text" id="proy-tech-horario" placeholder="Ej: 08:00 a 18:00"></div>
+    <div class="form-group"><label>Lugar / Locación</label><input type="text" id="proy-tech-lugar"></div>
+  </div>
+  <div class="form-group"><label>Alcance General del Servicio</label><textarea id="proy-tech-alcance" style="height:60px"></textarea></div>
 
-<div class="modal-overlay" id="modal-os"><div class="modal" style="width:640px"><h3>Orden de Servicio Técnico</h3><input type="hidden" id="os-id"><div class="form-row"><div class="form-group"><label>Cliente Titular</label><select id="os-cliente"></select><button class="btn btn-success btn-sm" style="margin-top:6px;width:100%;justify-content:center" onclick="openFastClienteModal()">+ Alta Express Cliente</button></div><div class="form-group"><label>Línea / Servicio Relacionado</label><select id="os-servicio"></select></div></div><div class="form-group"><label>Requerimientos / Descripción del Proyecto</label><textarea id="os-desc" style="height:80px"></textarea></div><div class="form-row"><div class="form-group"><label>Presupuesto Acordado (USD)</label><input type="number" id="os-monto" step="0.01"></div><div class="form-group"><label>Fecha Límite Compromiso</label><input type="date" id="os-entrega"></div></div><div class="form-row"><div class="form-group"><label>Estatus en Flujo</label><select id="os-estado"><option value="pendiente">Pendiente</option><option value="en_proceso">En Proceso</option><option value="completado">Completado</option><option value="cancelado">Cancelado</option></select></div><div class="form-group"><label>Especialista Responsable</label><select id="os-responsable"></select></div></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-os')">Cerrar Ventana</button><button class="btn btn-danger" id="btn-eliminar-os" onclick="deleteOSAction()">Eliminar OS</button><button class="btn btn-primary" onclick="saveOSAction()">Confirmar Datos</button></div><div id="os-audit-feed-container"></div></div></div>
+  <h4 style="margin:15px 0; color:var(--accent2)">3. Desglose de Ítems (Servicio, Entregables, Material y Talento)</h4>
+  <div style="background:var(--bg3); padding:12px; border-radius:8px; margin-bottom:12px">
+    <div style="display:grid; grid-template-columns: 1fr 2fr 1fr 1fr 1fr; gap:8px; margin-bottom:8px" id="items-inputs-header">
+      <label>Categoría</label><label>Concepto / Entregable / Talento</label><label>Cant.</label><label>Unidad</label><label>Precio U.</label>
+    </div>
+    <div id="items-builder-container"></div>
+    <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="addTableRowItem()">+ Inyectar Fila de Ítem</button>
+  </div>
 
-<div class="modal-overlay" id="modal-fast-cliente" style="z-index:300"><div class="modal" style="width:400px"><h3>+ Registro Express de Cliente</h3><div class="form-group"><label>Nombre Comercial</label><input type="text" id="fast-cli-nombre"></div><div class="form-group"><label>Sector</label><input type="text" id="fast-cli-sector"></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-fast-cliente')">Abortar</button><button class="btn btn-primary" onclick="saveFastClienteAction()">Inyectar y Seleccionar</button></div></div></div>
+  <h4 style="margin:15px 0; color:var(--accent2)">4. Configuración Financiera</h4>
+  <div class="form-row">
+    <div class="form-group"><label>Moneda Base</label><select id="proy-fin-moneda"><option value="USD">USD ($)</option><option value="BS">Bolívares (Bs)</option></select></div>
+    <div class="form-group"><label>Esquema de Pago</label><input type="text" id="proy-fin-esquema" placeholder="Ej: 70% anticipo / 30% finiquito"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label>Monto Anticipo ($)</label><input type="number" id="proy-fin-anticipo" value="0" step="0.01"></div>
+    <div class="form-group"><label>Monto Finiquito ($)</label><input type="number" id="proy-fin-finiquito" value="0" step="0.01"></div>
+  </div>
+  <div class="form-group"><label>Métodos de Pago Permitidos (Separados por coma)</label><input type="text" id="proy-fin-metodos" value="Zelle, Transferencia España, Efectivo, Binance"></div>
 
-<div class="modal-overlay" id="modal-movimiento"><div class="modal"><h3>Registro de Movimiento Diario</h3><input type="hidden" id="mov-id"><div class="form-row"><div class="form-group"><label>Tipo de Flujo</label><select id="mov-tipo"><option value="ingreso">Ingreso (+)</option><option value="egreso">Egreso (-)</option></select></div><div class="form-group"><label>Moneda Operativa</label><select id="mov-moneda"><option value="USD">USD ($)</option><option value="BS">Bolívares (Bs)</option></select></div></div><div class="form-row"><div class="form-group"><label>Monto Neto</label><input type="number" id="mov-monto" step="0.01"></div><div class="form-group"><label>Fecha Contable</label><input type="date" id="mov-fecha"></div></div><div class="form-row"><div class="form-group"><label>Vincular a Concepto Servicio</label><select id="mov-servicio"></select></div><div class="form-group"><label>Asociar Cliente (Opcional)</label><select id="mov-cliente"></select></div></div><div class="form-group"><label>Concepto / Glosa Breve</label><input type="text" id="mov-concepto" placeholder="Ej: Abono de pauta publicitaria"></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-movimiento')">Cancelar</button><button class="btn btn-danger" id="btn-eliminar-mov" onclick="deleteMovimientoAction()">Eliminar Transacción</button><button class="btn btn-primary" onclick="saveMovimientoAction()">Ejecutar</button></div></div></div>
+  <div class="form-actions">
+    <button class="btn btn-ghost" onclick="closeModal('modal-proyecto')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveProyectoMasterAction()">Guardar Estructura Central</button>
+  </div>
+</div></div>
 
-<div class="modal-overlay" id="modal-costo"><div class="modal"><h3>Ficha Gasto Operativo</h3><input type="hidden" id="costo-id"><div class="form-group"><label>Nombre del Item / Proveedor</label><input type="text" id="costo-nombre"></div><div class="form-row"><div class="form-group"><label>Estructura</label><select id="costo-tipo"><option value="fijo">Costo Estructural Fijo</option><option value="variable">Costo Variable Especial</option></select></div><div class="form-group"><label>Monto Fijo Mensual (USD)</label><input type="number" id="costo-monto" step="0.01"></div></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-costo')">Cancelar</button><button class="btn btn-danger" id="btn-eliminar-costo" onclick="deleteCostoAction()">Eliminar Gasto</button><button class="btn btn-primary" onclick="saveCostoAction()">Guardar Gasto</button></div></div></div>
+<!-- FAST CLIENTE DENTRO DE PROYECTO -->
+<div class="modal-overlay" id="modal-fast-cliente" style="z-index:300"><div class="modal" style="width:380px">
+  <h3>+ Registro Express de Cliente</h3>
+  <div class="form-group"><label>Nombre de la Empresa</label><input type="text" id="fast-cli-nombre"></div>
+  <div class="form-group"><label>RIF / Tax ID</label><input type="text" id="fast-cli-rif"></div>
+  <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-fast-cliente')">Abortar</button><button class="btn btn-primary" onclick="saveFastClienteAction()">Guardar e Inyectar</button></div>
+</div></div>
 
-<div class="modal-overlay" id="modal-personal"><div class="modal"><h3>Ficha de Personal Técnico</h3><input type="hidden" id="pers-id"><div class="form-row"><div class="form-group"><label>Nombre y Apellido</label><input type="text" id="pers-nombre"></div><div class="form-group"><label>Cargo Asignado</label><input type="text" id="pers-cargo"></div></div><div class="form-row"><div class="form-group"><label>Esquema de Contratación</label><select id="pers-tipo"><option value="fijo">Planta / Fijo</option><option value="freelance">Colaborador Freelance</option></select></div><div class="form-group"><label>Estatus Operativo</label><select id="pers-estado"><option value="activo">Estatus Activo</option><option value="inactivo">Estatus Inactivo</option></select></div></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-personal')">Cancelar</button><button class="btn btn-danger" id="btn-eliminar-pers" onclick="deletePersonalAction()">Baja de Sistema</button><button class="btn btn-primary" onclick="savePersonalAction()">Guardar Miembro</button></div></div></div>
+<!-- MODAL DE VISUALIZACIÓN / DESCARGA DE DOCUMENTOS COMERCIALES -->
+<div class="modal-overlay" id="modal-documento-output"><div class="modal" style="width:900px; background:var(--bg3)">
+  <h3>Generador Editorial de Documentos</h3>
+  <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap">
+    <button class="btn btn-ghost btn-sm" onclick="triggerTransformacionDoc('PROPUESTA')">Propuesta Comercial</button>
+    <button class="btn btn-ghost btn-sm" onclick="triggerTransformacionDoc('OS_INTERNA')">Orden Servicio Logística</button>
+    <button class="btn btn-ghost btn-sm" onclick="triggerTransformacionDoc('PREFACTURA')">Prefactura Interna</button>
+    <button class="btn btn-ghost btn-sm" onclick="triggerTransformacionDoc('ANTICIPO')">Cobranza: Anticipo</button>
+    <button class="btn btn-ghost btn-sm" onclick="triggerTransformacionDoc('FINIQUITO')">Cobranza: Finiquito</button>
+    <button class="btn btn-danger btn-sm" onclick="openNotaDebitoModal()">+ Nota de Débito (Extra)</button>
+    <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="downloadPDFNative()">⬇ Descargar PDF Original</button>
+  </div>
+  <div style="overflow-y:auto; max-height:65vh; background:#444; padding:20px; border-radius:8px">
+    <!-- El lienzo físico A4 estructurado según reglas obligatorias de diseño -->
+    <div id="print-lienzo-pdf" class="pdf-preview-box"></div>
+  </div>
+  <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-documento-output')">Cerrar Visualizador</button></div>
+</div></div>
+
+<!-- MODAL COMPLEMENTARIO: NOTA DE DEBITO -->
+<div class="modal-overlay" id="modal-nota-debito" style="z-index:300"><div class="modal" style="width:400px">
+  <h3>Inyectar Nota de Débito Complementaria</h3>
+  <div class="form-group"><label>Concepto del Extra (Horas extra, Rental adicional, Nuevos entregables)</label><input type="text" id="nd-concepto"></div>
+  <div class="form-group"><label>Descripción / Justificación</label><input type="text" id="nd-desc"></div>
+  <div class="form-group"><label>Monto Neto a Cargar (USD)</label><input type="number" id="nd-monto" step="0.01"></div>
+  <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-nota-debito')">Cancelar</button><button class="btn btn-primary" onclick="saveNotaDebitoAction()">Cargar Monto Extra</button></div>
+</div></div>
+
+<!-- MODAL CLIENTE STANDARD -->
+<div class="modal-overlay" id="modal-cliente"><div class="modal"><h3>Ficha de Cliente (CRM)</h3><input type="hidden" id="cli-id"><div class="form-group"><label>Nombre Empresa</label><input type="text" id="cli-nombre"></div><div class="form-group"><label>RIF / ID Fiscal</label><input type="text" id="cli-rif"></div><div class="form-group"><label>Contacto</label><input type="text" id="cli-contacto"></div><div class="form-group"><label>Teléfono</label><input type="text" id="cli-telefono"></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-cliente')">Cancelar</button><button class="btn btn-primary" onclick="saveClienteAction()">Guardar</button></div></div></div>
+
+<!-- MODAL TASA -->
+<div class="modal-overlay" id="modal-tasa"><div class="modal" style="width:340px"><h3>Tasa Financiera</h3><div class="form-group"><label>Valor 1 USD en Bs</label><input type="number" id="tasa-input" step="0.01"></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-tasa')">Cerrar</button><button class="btn btn-primary" onclick="saveTasa()">Actualizar</button></div></div></div>
 
 <script>
-let DB = { tasa: 40, clientes: {}, ordenes: {}, movimientos: {}, costos: {}, personal: {}, servicios_options: {}, auditoria: {} };
+let DB = { tasa: 45, clientes: {}, proyectos: {}, movimientos: {}, auditoria: {} };
 let currentUser = null;
-let currentMovPage = 1;
-const itemsPerPage = 15;
+let activeProjectKeyForDoc = null;
 
-/* MANEJO ESTÉTICO DE TEMAS DE INTERFAZ */
-function toggleVisualTheme() {
-  const currentTheme = document.documentElement.getAttribute("data-theme");
-  const newTheme = currentTheme === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", newTheme);
-  
-  const icon = document.getElementById("theme-btn-icon");
-  const text = document.getElementById("theme-btn-text");
-  
-  if(newTheme === "light") {
-    icon.textContent = "🌙"; text.textContent = "Oscuro";
-  } else {
-    icon.textContent = "☀️"; text.textContent = "Claro";
-  }
-}
+// ISOTIPO VECTORIAL COMPACTO DE OIKOS MEDIA (Extraído de la identidad visual de la web)
+const OIKOS_SVG_LOGO = `<svg width="42" height="42" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M50 5L15 40H35V95H65V40H85L50 5Z" fill="#6c63ff"/><circle cx="50" cy="55" r="12" fill="#ffffff"/></svg>`;
 
 window.addEventListener('firebase-ready', () => {
   window._fbOnAuth(window._fbAuth, user => {
@@ -327,640 +351,486 @@ window.addEventListener('firebase-ready', () => {
     } else {
       currentUser = null;
       document.getElementById('login-screen').classList.remove('hidden');
-      document.getElementById('nav').className = '';
-      document.getElementById('main').className = '';
+      document.getElementById('nav').className = ''; document.getElementById('main').className = '';
     }
   });
 });
 
 function initRealtimeSync() {
-  window._fbOnValue(window._fbRef(window._fbDB, 'oikos_enterprise'), snap => {
+  window._fbOnValue(window._fbRef(window._fbDB, 'oikos_v4_data'), snap => {
     if(snap.exists()) {
       DB = snap.val();
-      if(!DB.clientes) DB.clientes = {}; if(!DB.ordenes) DB.ordenes = {};
-      if(!DB.movimientos) DB.movimientos = {}; if(!DB.costos) DB.costos = {};
-      if(!DB.personal) DB.personal = {}; if(!DB.auditoria) DB.auditoria = {};
-      if(!DB.servicios_options) DB.servicios_options = { "01": "Producción de video", "02": "Edición", "03": "Fotografía" };
+      if(!DB.clientes) DB.clientes = {}; if(!DB.proyectos) DB.proyectos = {};
+      if(!DB.movimientos) DB.movimientos = {}; if(!DB.auditoria) DB.auditoria = {};
     }
     document.getElementById('loading-screen').classList.add('hidden');
     document.getElementById('nav').classList.add('visible');
     document.getElementById('main').classList.add('visible');
     
-    syncSelectDropdowns();
+    syncProjectDropdowns();
     renderCurrentPage();
   });
 }
 
-function syncSelectDropdowns() {
-  const osCli = document.getElementById('os-cliente');
-  const osServ = document.getElementById('os-servicio');
-  const osResp = document.getElementById('os-responsable');
-  const movServ = document.getElementById('mov-servicio');
-  const movCli = document.getElementById('mov-cliente');
-  const fMovServ = document.getElementById('f-mov-servicio');
-  const fMovCli = document.getElementById('f-mov-cliente');
-
-  let cliHtml = '<option value="">Seleccionar...</option>';
-  Object.keys(DB.clientes || {}).forEach(k => { if(DB.clientes[k].estado !== 'inactivo') cliHtml += `<option value="${k}">${DB.clientes[k].nombre}</option>`; });
-  osCli.innerHTML = cliHtml; movCli.innerHTML = cliHtml; fMovCli.innerHTML = '<option value="">Todos</option>' + cliHtml.replace('Seleccionar...', '');
-
-  let servHtml = '<option value="">Seleccionar...</option>';
-  Object.keys(DB.servicios_options || {}).forEach(k => { servHtml += `<option value="${DB.servicios_options[k]}">${DB.servicios_options[k]}</option>`; });
-  osServ.innerHTML = servHtml; movServ.innerHTML = servHtml; fMovServ.innerHTML = '<option value="">Todos</option>' + servHtml.replace('Seleccionar...', '');
-
-  let respHtml = '<option value="">Sin Asignar</option>';
-  Object.keys(DB.personal || {}).forEach(k => { if(DB.personal[k].estado !== 'inactivo') respHtml += `<option value="${k}">${DB.personal[k].nombre}</option>`; });
-  osResp.innerHTML = respHtml;
+function syncProjectDropdowns() {
+  const sel = document.getElementById('proy-cli-select');
+  let html = '<option value="">Seleccionar Cliente...</option>';
+  Object.keys(DB.clientes || {}).forEach(k => { html += `<option value="${k}">${DB.clientes[k].nombre}</option>`; });
+  sel.innerHTML = html;
 }
 
-const today=()=>new Date().toISOString().split('T')[0];
-
-/* TRAZABILIDAD ENGINE (AUDITORIA LOGS) */
-function logAction(accion, modulo, idItem, dataVieja, dataNueva) {
-  const logRef = window._fbRef(window._fbDB, 'oikos_enterprise/auditoria');
-  const nuevoLog = {
-    usuario: currentUser ? currentUser.email : 'System Operational',
-    accion: accion, modulo: modulo, idItem: idItem,
-    fecha: new Date().toLocaleDateString('es-VE'),
-    hora: new Date().toLocaleTimeString('es-VE'),
-    cambios: JSON.stringify({ antes: dataVieja, despues: dataNueva })
-  };
-  window._fbPush(logRef, nuevoLog);
+function toggleVisualTheme() {
+  const current = document.documentElement.getAttribute("data-theme");
+  document.documentElement.setAttribute("data-theme", current === "dark" ? "light" : "dark");
 }
 
-/* AUTENTICACION */
+function logSystemAction(accion, modulo, idItem, detalles) {
+  const nRef = window._fbPush(window._fbRef(window._fbDB, 'oikos_v4_data/auditoria'));
+  window._fbSet(nRef, {
+    usuario: currentUser ? currentUser.email : 'System',
+    accion, modulo, idItem, detalles: JSON.stringify(detalles),
+    fecha: new Date().toLocaleDateString('es-VE'), hora: new Date().toLocaleTimeString('es-VE')
+  });
+}
+
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-pass').value;
-  const err = document.getElementById('login-err');
-  err.style.display = 'none';
-  try { await window._fbSignIn(window._fbAuth, email, pass); }
-  catch(e) { err.textContent = "Credenciales incorrectas o no autorizadas."; err.style.display = 'block'; }
+  if(!email || !pass) return;
+  try { await window._fbSignIn(window._fbAuth, email, pass); } catch(e) { document.getElementById('login-err').textContent = "Fallo de firma."; document.getElementById('login-err').style.display='block'; }
 }
-async function doLogout() { if(confirm('¿Cerrar Sesión de Oikos Admon?')) await window._fbSignOut(window._fbAuth); }
+async function doLogout() { if(confirm('¿Cerrar Sesión?')) await window._fbSignOut(window._fbAuth); }
 
-/* NAVEGACIÓN */
 let currentPage = 'dashboard';
 function goto(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
-  
-  document.querySelectorAll('.nav-item').forEach(i => {
-    if(i.getAttribute('onclick') && i.getAttribute('onclick').includes(`'${page}'`)) i.classList.add('active');
-  });
-  
-  currentPage = page;
-  renderPage(page);
+  currentPage = page; renderPage(page);
 }
 function renderCurrentPage() { renderPage(currentPage); }
 function renderPage(page) {
   if(page === 'dashboard') renderDashboard();
+  if(page === 'proyectos_cotizados') renderProyectosMaster();
   if(page === 'clientes') renderClientes();
-  if(page === 'ordenes') renderOrdenes();
   if(page === 'kanban') renderKanban();
   if(page === 'movimientos') renderMovimientos();
-  if(page === 'costos') renderCostos();
-  if(page === 'personal') renderPersonal();
-  if(page === 'config_servicios') renderConfigServicios();
   if(page === 'historial_auditoria') renderAuditoria();
 }
 
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-/* CRM CLIENTES */
+/* GESTIÓN DE CLIENTES */
 function prepareNewCliente() {
-  document.getElementById('cli-id').value = '';
-  document.getElementById('cli-nombre').value = '';
-  document.getElementById('cli-sector').value = '';
-  document.getElementById('cli-email').value = '';
-  document.getElementById('cli-telefono').value = '';
-  document.getElementById('cli-rif').value = '';
-  document.getElementById('cli-estado').value = 'activo';
-  document.getElementById('btn-eliminar-cliente').style.display = 'none';
-  openModal('modal-cliente');
-}
-function editCliente(key) {
-  const c = DB.clientes[key];
-  document.getElementById('cli-id').value = key;
-  document.getElementById('cli-nombre').value = c.nombre;
-  document.getElementById('cli-sector').value = c.sector || '';
-  document.getElementById('cli-email').value = c.email || '';
-  document.getElementById('cli-telefono').value = c.telefono || '';
-  document.getElementById('cli-rif').value = c.rif || '';
-  document.getElementById('cli-estado').value = c.estado || 'activo';
-  document.getElementById('btn-eliminar-cliente').style.display = 'inline-flex';
-  openModal('modal-cliente');
+  document.getElementById('cli-id').value = ''; document.getElementById('cli-nombre').value = '';
+  document.getElementById('cli-rif').value = ''; document.getElementById('cli-contacto').value = '';
+  document.getElementById('cli-telefono').value = ''; openModal('modal-cliente');
 }
 function saveClienteAction() {
-  const key = document.getElementById('cli-id').value;
-  const nombre = document.getElementById('cli-nombre').value.trim();
-  if(!nombre) return alert('Nombre obligatorio');
-  const nuevoObj = {
-    nombre, sector: document.getElementById('cli-sector').value,
-    email: document.getElementById('cli-email').value, telefono: document.getElementById('cli-telefono').value,
-    rif: document.getElementById('cli-rif').value, estado: document.getElementById('cli-estado').value
+  const id = document.getElementById('cli-id').value;
+  const obj = {
+    nombre: document.getElementById('cli-nombre').value.trim(), rif: document.getElementById('cli-rif').value,
+    contacto: document.getElementById('cli-contacto').value, telefono: document.getElementById('cli-telefono').value
   };
-  if(key) {
-    logAction('Editar', 'Clientes', key, DB.clientes[key], nuevoObj);
-    window._fbUpdate(window._fbRef(window._fbDB, 'oikos_enterprise/clientes/' + key), nuevoObj);
-  } else {
-    const nRef = window._fbPush(window._fbRef(window._fbDB, 'oikos_enterprise/clientes'));
-    logAction('Crear', 'Clientes', nRef.key, {}, nuevoObj);
-    window._fbSet(nRef, nuevoObj);
-  }
+  if(!obj.nombre) return;
+  if(id) { window._fbUpdate(window._fbRef(window._fbDB, 'oikos_v4_data/clientes/' + id), obj); }
+  else { window._fbSet(window._fbPush(window._fbRef(window._fbDB, 'oikos_v4_data/clientes')), obj); }
   closeModal('modal-cliente');
 }
-function deleteClienteAction() {
-  const key = document.getElementById('cli-id').value;
-  let linked = Object.values(DB.ordenes || {}).some(o => o.clienteId === key) || Object.values(DB.movimientos || {}).some(m => m.clienteId === key);
-  if(linked) {
-    if(confirm('El cliente posee historial de transacciones u órdenes en el estudio. No se puede eliminar del servidor. ¿Deseas colocarlo como Inactivo?')) {
-      window._fbUpdate(window._fbRef(window._fbDB, 'oikos_enterprise/clientes/' + key), { estado: 'inactivo' });
-      logAction('Inactivar (Soft Delete)', 'Clientes', key, DB.clientes[key], { ...DB.clientes[key], estado: 'inactivo' });
-    }
-  } else {
-    if(confirm('¿Eliminar definitivamente este cliente de los registros raíz?')) {
-      logAction('Eliminar', 'Clientes', key, DB.clientes[key], {});
-      window._fbSet(window._fbRef(window._fbDB, 'oikos_enterprise/clientes/' + key), null);
-    }
-  }
-  closeModal('modal-cliente');
-}
-function openFastClienteModal() { document.getElementById('fast-cli-nombre').value = ''; document.getElementById('fast-cli-sector').value = ''; openModal('modal-fast-cliente'); }
 function saveFastClienteAction() {
   const nombre = document.getElementById('fast-cli-nombre').value.trim();
-  if(!nombre) return alert('Nombre comercial obligatorio');
-  const nuevoObj = { nombre, sector: document.getElementById('fast-cli-sector').value, estado: 'activo' };
-  const nRef = window._fbPush(window._fbRef(window._fbDB, 'oikos_enterprise/clientes'));
-  logAction('Crear Express dentro de OS', 'Clientes', nRef.key, {}, nuevoObj);
-  window._fbSet(nRef, nuevoObj).then(() => {
-    syncSelectDropdowns();
-    document.getElementById('os-cliente').value = nRef.key;
+  if(!nombre) return alert('Nombre requerido');
+  const obj = { nombre, rif: document.getElementById('fast-cli-rif').value, contacto: '', telefono: '' };
+  const nRef = window._fbPush(window._fbRef(window._fbDB, 'oikos_v4_data/clientes'));
+  window._fbSet(nRef, obj).then(() => {
+    syncProjectDropdowns();
+    document.getElementById('proy-cli-select').value = nRef.key;
     closeModal('modal-fast-cliente');
   });
 }
+function openFastClienteModal() { document.getElementById('fast-cli-nombre').value = ''; document.getElementById('fast-cli-sector').value = ''; openModal('modal-fast-cliente'); }
 function renderClientes() {
-  const grid = document.getElementById('clientes-grid');
-  grid.innerHTML = '';
-  if(!DB.clientes || Object.keys(DB.clientes).length === 0) { grid.innerHTML = '<div class="empty-state">No hay registros cargados.</div>'; return; }
-  Object.keys(DB.clientes).forEach(k => {
-    const c = DB.clientes[k];
-    grid.innerHTML += `<div class="card" style="cursor:pointer" onclick="editCliente('${k}')">
-      <div style="font-weight:700;font-size:15px;margin-bottom:2px">${c.nombre}</div>
-      <div style="color:var(--text2);font-size:12px;margin-bottom:8px">${c.sector || 'Sin sector industrial'}</div>
-      <span class="badge ${c.estado === 'inactivo' ? 'badge-red' : 'badge-green'}">${c.estado || 'activo'}</span>
-    </div>`;
+  const grid = document.getElementById('clientes-grid'); grid.innerHTML = '';
+  Object.keys(DB.clientes || {}).forEach(k => {
+    grid.innerHTML += `<div class="card"><b>${DB.clientes[k].nombre}</b><br><span style="font-size:12px; color:var(--text2)">RIF: ${DB.clientes[k].rif || '—'}</span></div>`;
   });
 }
 
-/* ORDENES DE SERVICIO */
-function prepareNewOS(estadoInicial = 'pendiente') {
-  document.getElementById('os-id').value = '';
-  document.getElementById('os-cliente').value = '';
-  document.getElementById('os-servicio').value = '';
-  document.getElementById('os-desc').value = '';
-  document.getElementById('os-monto').value = '';
-  document.getElementById('os-entrega').value = '';
-  document.getElementById('os-estado').value = estadoInicial;
-  document.getElementById('os-responsable').value = '';
-  document.getElementById('btn-eliminar-os').style.display = 'none';
-  document.getElementById('os-audit-feed-container').innerHTML = '';
-  openModal('modal-os');
+/* FILAS DINÁMICAS DEL CONSTRUCTOR DE ÍTEMS */
+function addTableRowItem(cat='', con='', desc='', cant=1, uni='Pauta', pre=0) {
+  const container = document.getElementById('items-builder-container');
+  const div = document.createElement('div');
+  div.className = 'item-builder-row';
+  div.style.display = 'grid'; div.style.gridTemplateColumns = '1fr 2fr 1fr 1fr 1fr auto'; div.style.gap = '8px'; div.style.marginBottom = '6px';
+  div.innerHTML = `
+    <input type="text" class="item-cat" value="${cat}" placeholder="Ej: Material, Talento">
+    <input type="text" class="item-con" value="${con}" placeholder="Ej: Cámara Red, Actor Principal">
+    <input type="number" class="item-cant" value="${cant}" style="padding:4px">
+    <input type="text" class="item-uni" value="${uni}" placeholder="Pauta">
+    <input type="number" class="item-pre" value="${pre}" step="0.01" style="padding:4px">
+    <button class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">X</button>
+  `;
+  container.appendChild(div);
 }
-function editOS(key) {
-  const o = DB.ordenes[key];
-  document.getElementById('os-id').value = key;
-  document.getElementById('os-cliente').value = o.clienteId || '';
-  document.getElementById('os-servicio').value = o.servicio || '';
-  document.getElementById('os-desc').value = o.desc || '';
-  document.getElementById('os-monto').value = o.monto || '';
-  document.getElementById('os-entrega').value = o.entrega || '';
-  document.getElementById('os-estado').value = o.estado || 'pendiente';
-  document.getElementById('os-responsable').value = o.responsableId || '';
-  document.getElementById('btn-eliminar-os').style.display = 'inline-flex';
+
+/* CORE DE LA CÉLULA MADRE: PROYECTOS */
+function prepareNewProyecto() {
+  document.getElementById('proy-id').value = '';
+  document.getElementById('proy-meta-id').value = 'PROY-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+  document.getElementById('proy-meta-asesor').value = '';
+  document.getElementById('proy-cli-select').value = '';
+  document.getElementById('proy-cli-contacto').value = '';
+  document.getElementById('proy-tech-linea').value = '';
+  document.getElementById('proy-tech-pauta').value = '';
+  document.getElementById('proy-tech-jornadas').value = 1;
+  document.getElementById('proy-tech-fecha').value = today();
+  document.getElementById('proy-tech-horario').value = '';
+  document.getElementById('proy-tech-lugar').value = '';
+  document.getElementById('proy-tech-alcance').value = '';
+  document.getElementById('proy-fin-moneda').value = 'USD';
+  document.getElementById('proy-fin-esquema').value = '50% anticipo / 50% finiquito';
+  document.getElementById('proy-fin-anticipo').value = 0;
+  document.getElementById('proy-fin-finiquito').value = 0;
+  document.getElementById('proy-fin-metodos').value = 'Zelle, Pago Móvil VE, Transferencia España';
+  document.getElementById('items-builder-container').innerHTML = '';
   
-  let feedHtml = '<div class="audit-feed"><h4>Bitácora Completa de esta OS</h4>';
-  let logsFiltrados = Object.values(DB.auditoria || {}).filter(log => log.modulo === 'OS' && log.idItem === key);
-  if(logsFiltrados.length === 0) {
-    feedHtml += '<div class="audit-item" style="color:var(--text2)">Sin registros de auditoría aún.</div>';
-  } else {
-    logsFiltrados.forEach(log => {
-      feedHtml += `<div class="audit-item"><b>${log.usuario}</b> ejecutó la acción [${log.accion}] el día ${log.fecha} a las ${log.hora}</div>`;
+  // Inyectar 2 filas de ejemplo para guiar al operador
+  addTableRowItem('Servicio', 'Producción Audiovisual Base', 'Incluye Dirección y Post-producción', 1, 'Proyecto', 1200);
+  addTableRowItem('Talento', 'Locutor Comercial Voz-Off', 'Material entregable final', 1, 'Pieza', 150);
+  
+  openModal('modal-proyecto');
+}
+
+function saveProyectoMasterAction() {
+  const key = document.getElementById('proy-id').value;
+  const cliKey = document.getElementById('proy-cli-select').value;
+  if(!cliKey) return alert('Debes seleccionar un cliente.');
+  
+  // Compilar lista de ítems dinámicos según el esquema estricto
+  const itemsArray = [];
+  let calculatedSubtotal = 0;
+  
+  document.querySelectorAll('#items-builder-container .item-builder-row').forEach(row => {
+    const cant = parseFloat(row.querySelector('.item-cant').value) || 0;
+    const precio = parseFloat(row.querySelector('.item-pre').value) || 0;
+    const totalRow = cant * precio;
+    calculatedSubtotal += totalRow;
+    
+    itemsArray.push({
+      categoria: row.querySelector('.item-cat').value.trim(),
+      concepto: row.querySelector('.item-con').value.trim(),
+      descripcion: '', // Reservado para compatibilidad extendida
+      cantidad: cant, unidad: row.querySelector('.item-uni').value.trim(),
+      precio_unitario: precio, total: totalRow
     });
-  }
-  feedHtml += '</div>';
-  document.getElementById('os-audit-feed-container').innerHTML = feedHtml;
-  openModal('modal-os');
-}
-function saveOSAction() {
-  const key = document.getElementById('os-id').value;
-  const clienteId = document.getElementById('os-cliente').value;
-  const desc = document.getElementById('os-desc').value.trim();
-  if(!clienteId || !desc) return alert('Asignación de cliente y descripción obligatorias');
-  const nuevoObj = {
-    clienteId, clienteNombre: DB.clientes[clienteId] ? DB.clientes[clienteId].nombre : 'Desconocido',
-    servicio: document.getElementById('os-servicio').value, desc,
-    monto: parseFloat(document.getElementById('os-monto').value) || 0,
-    entrega: document.getElementById('os-entrega').value, estado: document.getElementById('os-estado').value,
-    responsableId: document.getElementById('os-responsable').value
+  });
+
+  const totalGeneralCalculated = calculatedSubtotal; // Escalable para aplicar impuestos si se requiere
+
+  // Construcción de la Célula Madre de Datos (JSON Centralizado Obligatorio)
+  const masterJSON = {
+    metadata: {
+      id_proyecto: document.getElementById('proy-meta-id').value.trim(),
+      fecha_creacion: today(),
+      asesor: document.getElementById('proy-meta-asesor').value.trim(),
+      version: 1
+    },
+    cliente: {
+      nombre_empresa: DB.clientes[cliKey].nombre,
+      rif_id: DB.clientes[cliKey].rif || '—',
+      contacto: document.getElementById('proy-cli-contacto').value.trim(),
+      telefono: DB.clientes[cliKey].telefono || '—'
+    },
+    proyecto: {
+      linea_servicio: document.getElementById('proy-tech-linea').value.trim(),
+      alcance_general: document.getElementById('proy-tech-alcance').value.trim(),
+      tiempo_pauta: document.getElementById('proy-tech-pauta').value.trim(),
+      jornadas_totales: parseInt(document.getElementById('proy-tech-jornadas').value) || 1,
+      fecha_evento: document.getElementById('proy-tech-fecha').value,
+      horario: document.getElementById('proy-tech-horario').value.trim(),
+      lugar: document.getElementById('proy-tech-lugar').value.trim()
+    },
+    items: itemsArray,
+    financiero: {
+      moneda_base: document.getElementById('proy-fin-moneda').value,
+      subtotal: calculatedSubtotal,
+      impuestos: 0, // Campo dinámico ocultable si es 0
+      total_general: totalGeneralCalculated,
+      esquema_pago: document.getElementById('proy-fin-esquema').value.trim(),
+      anticipo_monto: parseFloat(document.getElementById('proy-fin-anticipo').value) || 0,
+      finiquito_monto: parseFloat(document.getElementById('proy-fin-finiquito').value) || 0,
+      metodos_permitidos: document.getElementById('proy-fin-metodos').value.split(',').map(x => x.trim())
+    }
   };
+
   if(key) {
-    logAction('Editar', 'OS', key, DB.ordenes[key], nuevoObj);
-    window._fbUpdate(window._fbRef(window._fbDB, 'oikos_enterprise/ordenes/' + key), nuevoObj);
+    logSystemAction('Modificación Estructura', 'Proyectos', masterJSON.metadata.id_proyecto, masterJSON);
+    window._fbUpdate(window._fbRef(window._fbDB, 'oikos_v4_data/proyectos/' + key), masterJSON);
   } else {
-    const nRef = window._fbPush(window._fbRef(window._fbDB, 'oikos_enterprise/ordenes'));
-    logAction('Crear', 'OS', nRef.key, {}, nuevoObj);
-    window._fbSet(nRef, nuevoObj);
+    const nRef = window._fbPush(window._fbRef(window._fbDB, 'oikos_v4_data/proyectos'));
+    logSystemAction('Creación Célula Madre', 'Proyectos', masterJSON.metadata.id_proyecto, masterJSON);
+    window._fbSet(nRef, masterJSON);
   }
-  closeModal('modal-os');
-}
-function deleteOSAction() {
-  const key = document.getElementById('os-id').value;
-  if(confirm('¿Eliminar permanentemente esta orden de servicio del flujo del estudio?')) {
-    logAction('Eliminar', 'OS', key, DB.ordenes[key], {});
-    window._fbSet(window._fbRef(window._fbDB, 'oikos_enterprise/ordenes/' + key), null);
-    closeModal('modal-os');
-  }
-}
-function updateOSEstadoDirecto(key, nuevoEstado) {
-  if(DB.ordenes[key].estado === nuevoEstado) return;
-  const copiaVieja = { ...DB.ordenes[key] };
-  window._fbUpdate(window._fbRef(window._fbDB, 'oikos_enterprise/ordenes/' + key), { estado: nuevoEstado });
-  logAction('Reordenación por Arrastre Kanban', 'OS', key, copiaVieja, { ...copiaVieja, estado: nuevoEstado });
-}
-function renderOrdenes() {
-  const container = document.getElementById('os-list');
-  container.innerHTML = '';
-  if(!DB.ordenes || Object.keys(DB.ordenes).length === 0) { container.innerHTML = '<div class="empty-state">No hay órdenes de servicio activas.</div>'; return; }
-  Object.keys(DB.ordenes).forEach(k => {
-    const o = DB.ordenes[k];
-    container.innerHTML += `<div class="card" style="cursor:pointer" onclick="editOS('${k}')">
-      <div style="font-weight:700">#OS — ${o.clienteNombre}</div>
-      <div style="font-size:12px;color:var(--text2);margin-top:2px">Categoría Técnica: ${o.servicio || 'General / Personalizado'}</div>
-      <p style="margin:8px 0;font-size:13px;line-height:1.4">${o.desc}</p>
-      <div><span class="badge badge-blue">${o.estado.replace('_',' ')}</span> <b style="color:var(--green)">$${o.monto}</b></div>
-    </div>`;
-  });
+  closeModal('modal-proyecto');
 }
 
-/* KANBAN WEBSOCKET AUTO-UPDATE */
-function renderKanban() {
-  const board = document.getElementById('kanban-board');
-  const frentes = ['pendiente', 'en_proceso', 'completado', 'cancelado'];
-  board.innerHTML = frentes.map(f => {
-    return `<div class="kanban-col" ondragover="event.preventDefault()" ondrop="dropOS(event, '${f}')">
-      <div class="kanban-col-title"><b>${f.replace('_',' ').toUpperCase()}</b> <button class="btn btn-ghost btn-sm" onclick="prepareNewOS('${f}')">+</button></div>
-      <div id="col-${f}" style="min-height:380px"></div>
-    </div>`;
-  }).join('');
-
-  Object.keys(DB.ordenes || {}).forEach(k => {
-    const o = DB.ordenes[k];
-    const col = document.getElementById('col-' + o.estado);
-    if(col) {
-      col.innerHTML += `<div class="kanban-card" draggable="true" ondragstart="dragOS(event, '${k}')" onclick="editOS('${k}')">
-        <div style="font-weight:700;font-size:12px;color:var(--text)">#OS — ${o.clienteNombre}</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:2px">${o.servicio || 'General'}</div>
-        <div style="font-weight:700;color:var(--green);font-size:12px;margin-top:6px">$${o.monto}</div>
-      </div>`;
-    }
-  });
-}
-function dragOS(ev, key) { ev.dataTransfer.setData("text", key); }
-function dropOS(ev, destino) { ev.preventDefault(); const key = ev.dataTransfer.getData("text"); updateOSEstadoDirecto(key, destino); }
-
-/* CAJA Y MOVIMIENTOS FINANCIAL CORE */
-function prepareNewMovimiento() {
-  document.getElementById('mov-id').value = '';
-  document.getElementById('mov-tipo').value = 'ingreso';
-  document.getElementById('mov-moneda').value = 'USD';
-  document.getElementById('mov-monto').value = '';
-  document.getElementById('mov-fecha').value = today();
-  document.getElementById('mov-servicio').value = '';
-  document.getElementById('mov-cliente').value = '';
-  document.getElementById('mov-concepto').value = '';
-  document.getElementById('btn-eliminar-mov').style.display = 'none';
-  openModal('modal-movimiento');
-}
-function editMovimiento(key) {
-  const m = DB.movimientos[key];
-  document.getElementById('mov-id').value = key;
-  document.getElementById('mov-tipo').value = m.tipo;
-  document.getElementById('mov-moneda').value = m.moneda || 'USD';
-  document.getElementById('mov-monto').value = m.monto;
-  document.getElementById('mov-fecha').value = m.fecha;
-  document.getElementById('mov-servicio').value = m.servicio || '';
-  document.getElementById('mov-cliente').value = m.clienteId || '';
-  document.getElementById('mov-concepto').value = m.concepto || '';
-  document.getElementById('btn-eliminar-mov').style.display = 'inline-flex';
-  openModal('modal-movimiento');
-}
-function saveMovimientoAction() {
-  const key = document.getElementById('mov-id').value;
-  const monto = parseFloat(document.getElementById('mov-monto').value) || 0;
-  if(!monto) return alert('Introduce un monto numérico válido');
-  const nuevoObj = {
-    tipo: document.getElementById('mov-tipo').value, moneda: document.getElementById('mov-moneda').value,
-    monto, fecha: document.getElementById('mov-fecha').value, servicio: document.getElementById('mov-servicio').value,
-    clienteId: document.getElementById('mov-cliente').value, concepto: document.getElementById('mov-concepto').value
-  };
-  if(key) {
-    logAction('Editar', 'Movimientos', key, DB.movimientos[key], nuevoObj);
-    window._fbUpdate(window._fbRef(window._fbDB, 'oikos_enterprise/movimientos/' + key), nuevoObj);
-  } else {
-    const nRef = window._fbPush(window._fbRef(window._fbDB, 'oikos_enterprise/movimientos'));
-    logAction('Crear', 'Movimientos', nRef.key, {}, nuevoObj);
-    window._fbSet(nRef, nuevoObj);
-  }
-  closeModal('modal-movimiento');
-}
-function deleteMovimientoAction() {
-  const key = document.getElementById('mov-id').value;
-  if(confirm('¿Eliminar permanentemente esta transacción de caja?')) {
-    logAction('Eliminar', 'Movimientos', key, DB.movimientos[key], {});
-    window._fbSet(window._fbRef(window._fbDB, 'oikos_enterprise/movimientos/' + key), null);
-    closeModal('modal-movimiento');
-  }
-}
-function renderMovimientos() {
-  const wrap = document.getElementById('movimientos-table-wrap');
+function renderProyectosMaster() {
+  const wrap = document.getElementById('proyectos-table-wrap');
+  if(!DB.proyectos || Object.keys(DB.proyectos).length === 0) { wrap.innerHTML = '<div class="empty-state">No hay proyectos estructurados en la célula madre.</div>'; return; }
   
-  const fTipo = document.getElementById('f-mov-tipo').value;
-  const fServ = document.getElementById('f-mov-servicio').value;
-  const fCli = document.getElementById('f-mov-cliente').value;
-  const fMes = document.getElementById('f-mov-mes').value;
-
-  let filtrados = Object.keys(DB.movimientos || {}).map(k => ({ ...DB.movimientos[k], key: k })).filter(m => {
-    if(fTipo && m.tipo !== fTipo) return false;
-    if(fServ && m.servicio !== fServ) return false;
-    if(fCli && m.clienteId !== fCli) return false;
-    if(fMes && (!m.fecha || !m.fecha.startsWith(fMes))) return false;
-    return true;
-  }).sort((a,b)=> new Date(b.fecha) - new Date(a.fecha));
-
-  const totalItems = filtrados.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-  if(currentMovPage > totalPages) currentMovPage = totalPages;
-  
-  document.getElementById('page-indicator').textContent = `Bloque Compilado ${currentMovPage} de ${totalPages}`;
-  
-  const inicio = (currentMovPage - 1) * itemsPerPage;
-  const bloque = filtrados.slice(inicio, inicio + itemsPerPage);
-
-  if(bloque.length === 0) { wrap.innerHTML = '<div class="empty-state">Sin transacciones registradas bajo este segmento.</div>'; return; }
-
-  let tableHtml = `<table><thead><tr><th>Fecha Valor</th><th>Operación</th><th>Glosa / Concepto</th><th>Servicio Comercial</th><th>Moneda Origen</th><th>Monto Equivalente</th><th>Acción</th></tr></thead><tbody>`;
-  bloque.forEach(m => {
-    tableHtml += `<tr>
-      <td><b>${m.fecha}</b></td>
-      <td><span class="badge ${m.tipo === 'ingreso' ? 'badge-green' : 'badge-red'}">${m.tipo}</span></td>
-      <td>${m.concepto || '—'}</td>
-      <td>${m.servicio || 'General'}</td>
-      <td>${m.moneda || 'USD'}</td>
-      <td style="font-weight:700" class="${m.tipo === 'ingreso' ? 'text-green' : 'text-red'}">${m.tipo === 'ingreso' ? '+' : '-'}$${m.monto}</td>
-      <td><button class="btn btn-ghost btn-sm" onclick="editMovimiento('${m.key}')">Editar</button></td>
-    </tr>`;
-  });
-  tableHtml += '</tbody></table>';
-  wrap.innerHTML = tableHtml;
-}
-function prevPageMovs() { if(currentMovPage > 1) { currentMovPage--; renderMovimientos(); } }
-function nextPageMovs() { currentMovPage++; renderMovimientos(); }
-
-/* EXPORTACIÓN EXCEL LIMPIA CON FILA DE TOTALES COMPILADA */
-function exportMovimientosExcel() {
-  let csv = 'Fecha Contable,Tipo Flujo,Glosa Concepto,Servicio Asignado,Moneda de Pago,Monto Compilado (USD Equivalente)\n';
-  let tIng = 0; let tEgr = 0;
-  Object.values(DB.movimientos || {}).forEach(m => {
-    let usdValue = m.moneda === 'BS' ? m.monto / DB.tasa : m.monto;
-    if(m.tipo === 'ingreso') tIng += usdValue; else tEgr += usdValue;
-    csv += `${m.fecha},${m.tipo},"${m.concepto || ''}",${m.servicio || 'General'},${m.moneda || 'USD'},${usdValue.toFixed(2)}\n`;
-  });
-  csv += `\n,,,,TOTAL INGRESOS AUDITADOS EN EXCEL,${tIng.toFixed(2)}\n`;
-  csv += `,,,,TOTAL EGRESOS AUDITADOS EN EXCEL,${tEgr.toFixed(2)}\n`;
-  csv += `,,,,RENTABILIDAD LIQUIDA TOTAL,${(tIng - tEgr).toFixed(2)}\n`;
-
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `Oikos_Reporte_Financiero_Clean_${today()}.csv`;
-  a.click();
-}
-
-/* COSTOS OPERATIVOS */
-function prepareNewCosto() {
-  document.getElementById('costo-id').value = '';
-  document.getElementById('costo-nombre').value = '';
-  document.getElementById('costo-tipo').value = 'fijo';
-  document.getElementById('costo-monto').value = '';
-  document.getElementById('btn-eliminar-costo').style.display = 'none';
-  openModal('modal-costo');
-}
-function editCosto(key) {
-  const c = DB.costos[key];
-  document.getElementById('costo-id').value = key;
-  document.getElementById('costo-nombre').value = c.nombre;
-  document.getElementById('costo-tipo').value = c.tipo;
-  document.getElementById('costo-monto').value = c.monto;
-  document.getElementById('btn-eliminar-costo').style.display = 'inline-flex';
-  openModal('modal-costo');
-}
-function saveCostoAction() {
-  const key = document.getElementById('costo-id').value;
-  const nombre = document.getElementById('costo-nombre').value.trim();
-  const monto = parseFloat(document.getElementById('costo-monto').value) || 0;
-  if(!nombre || !monto) return alert('Los campos estructurales son obligatorios');
-  const nuevoObj = { nombre, tipo: document.getElementById('costo-tipo').value, monto };
-  if(key) {
-    logAction('Editar', 'Costos', key, DB.costos[key], nuevoObj);
-    window._fbUpdate(window._fbRef(window._fbDB, 'oikos_enterprise/costos/' + key), nuevoObj);
-  } else {
-    const nRef = window._fbPush(window._fbRef(window._fbDB, 'oikos_enterprise/costos'));
-    logAction('Crear', 'Costos', nRef.key, {}, nuevoObj);
-    window._fbSet(nRef, nuevoObj);
-  }
-  closeModal('modal-costo');
-}
-function deleteCostoAction() {
-  const key = document.getElementById('costo-id').value;
-  if(confirm('¿Eliminar permanentemente la asignación de este costo?')) {
-    logAction('Eliminar', 'Costos', key, DB.costos[key], {});
-    window._fbSet(window._fbRef(window._fbDB, 'oikos_enterprise/costos/' + key), null);
-    closeModal('modal-costo');
-  }
-}
-function renderCostos() {
-  const wrap = document.getElementById('costos-table-wrap');
-  if(!DB.costos || Object.keys(DB.costos).length === 0) { wrap.innerHTML = '<div class="empty-state">No hay costos operativos asignados.</div>'; return; }
-  let html = `<table><thead><tr><th>Descripción Gasto</th><th>Clasificación</th><th>Costo Fijo Mensual (USD)</th><th>Acción</th></tr></thead><tbody>`;
-  Object.keys(DB.costos).forEach(k => {
-    const c = DB.costos[k];
-    html += `<tr><td><b>${c.nombre}</b></td><td><span class="badge ${c.tipo === 'fijo' ? 'badge-blue' : 'badge-amber'}">${c.tipo}</span></td><td>$${c.monto}</td><td><button class="btn btn-ghost btn-sm" onclick="editCosto('${k}')">Editar</button></td></tr>`;
-  });
-  html += '</tbody></table>';
-  wrap.innerHTML = html;
-}
-
-/* PERSONAL */
-function prepareNewPersonal() {
-  document.getElementById('pers-id').value = '';
-  document.getElementById('pers-nombre').value = '';
-  document.getElementById('pers-cargo').value = '';
-  document.getElementById('pers-tipo').value = 'fijo';
-  document.getElementById('pers-estado').value = 'activo';
-  document.getElementById('btn-eliminar-pers').style.display = 'none';
-  openModal('modal-personal');
-}
-function editPersonal(key) {
-  const p = DB.personal[key];
-  document.getElementById('pers-id').value = key;
-  document.getElementById('pers-nombre').value = p.nombre;
-  document.getElementById('pers-cargo').value = p.cargo || '';
-  document.getElementById('pers-tipo').value = p.tipo || 'fijo';
-  document.getElementById('pers-estado').value = p.estado || 'activo';
-  document.getElementById('btn-eliminar-pers').style.display = 'inline-flex';
-  openModal('modal-personal');
-}
-function savePersonalAction() {
-  const key = document.getElementById('pers-id').value;
-  const nombre = document.getElementById('pers-nombre').value.trim();
-  if(!nombre) return alert('Nombre completo obligatorio');
-  const nuevoObj = { nombre, cargo: document.getElementById('pers-cargo').value, tipo: document.getElementById('pers-tipo').value, estado: document.getElementById('pers-estado').value };
-  if(key) {
-    logAction('Editar', 'Personal', key, DB.personal[key], nuevoObj);
-    window._fbUpdate(window._fbRef(window._fbDB, 'oikos_enterprise/personal/' + key), nuevoObj);
-  } else {
-    const nRef = window._fbPush(window._fbRef(window._fbDB, 'oikos_enterprise/personal'));
-    logAction('Crear', 'Personal', nRef.key, {}, nuevoObj);
-    window._fbSet(nRef, nuevoObj);
-  }
-  closeModal('modal-personal');
-}
-function deletePersonalAction() {
-  const key = document.getElementById('pers-id').value;
-  let linked = Object.values(DB.ordenes || {}).some(o => o.responsableId === key);
-  if(linked) {
-    if(confirm('Este miembro tiene asignaciones en la línea de producción activa. ¿Deseas colocar su ficha como Inactiva para preservar la integridad del historial?')) {
-      window._fbUpdate(window._fbRef(window._fbDB, 'oikos_enterprise/personal/' + key), { estado: 'inactivo' });
-      logAction('Inactivar (Soft Delete)', 'Personal', key, DB.personal[key], { ...DB.personal[key], estado: 'inactivo' });
-    }
-  } else {
-    if(confirm('¿Dar de baja definitiva de los servidores a este especialista?')) {
-      logAction('Eliminar', 'Personal', key, DB.personal[key], {});
-      window._fbSet(window._fbRef(window._fbDB, 'oikos_enterprise/personal/' + key), null);
-    }
-  }
-  closeModal('modal-personal');
-}
-function renderPersonal() {
-  const wrap = document.getElementById('personal-table-wrap');
-  if(!DB.personal || Object.keys(DB.personal).length === 0) { wrap.innerHTML = '<div class="empty-state">No hay personal de equipo registrado.</div>'; return; }
-  let html = `<table><thead><tr><th>Nombre Completo</th><th>Especialidad / Cargo</th><th>Contratación</th><th>Estatus</th><th>Acción</th></tr></thead><tbody>`;
-  Object.keys(DB.personal).forEach(k => {
-    const p = DB.personal[k];
-    html += `<tr><td><b>${p.nombre}</b></td><td>${p.cargo || '—'}</td><td>${p.tipo}</td><td><span class="badge ${p.estado === 'inactivo' ? 'badge-red' : 'badge-green'}">${p.estado || 'activo'}</span></td><td><button class="btn btn-ghost btn-sm" onclick="editPersonal('${k}')">Editar</button></td></tr>`;
-  });
-  html += '</tbody></table>';
-  wrap.innerHTML = html;
-}
-
-/* CONFIG CATÁLOGO SERVICIOS DINÁMICOS */
-function addServicioOption() {
-  const name = document.getElementById('new-servicio-option-name').value.trim();
-  if(!name) return;
-  window._fbPush(window._fbRef(window._fbDB, 'oikos_enterprise/servicios_options'), name);
-  document.getElementById('new-servicio-option-name').value = '';
-}
-function deleteServicioOption(key) {
-  if(confirm('¿Eliminar esta opción técnica del catálogo comercial?')) {
-    window._fbSet(window._fbRef(window._fbDB, 'oikos_enterprise/servicios_options/' + key), null);
-  }
-}
-function renderConfigServicios() {
-  const list = document.getElementById('config-servicios-list');
-  list.innerHTML = '';
-  Object.keys(DB.servicios_options || {}).forEach(k => {
-    list.innerHTML += `<div style="display:flex;justify-content:space-between;padding:10px;background:var(--bg3);border:1px solid var(--border);margin-bottom:6px;border-radius:6px;align-items:center">
-      <span style="font-size:13px;font-weight:600">${DB.servicios_options[k]}</span>
-      <button class="btn btn-danger btn-sm" onclick="deleteServicioOption('${k}')">Eliminar Opción</button>
-    </div>`;
-  });
-}
-
-/* RENDERING DE HISTORIAL COMPLETO DE LOGS */
-function renderAuditoria() {
-  const wrap = document.getElementById('auditoria-table-wrap');
-  if(!DB.auditoria || Object.keys(DB.auditoria).length === 0) { wrap.innerHTML = '<div class="empty-state">Sin trazas registradas.</div>'; return; }
-  let html = `<table><thead><tr><th>Estampa Cronológica</th><th>Operador</th><th>Operación</th><th>Módulo</th><th>Data Log Completo (JSON)</th></tr></thead><tbody>`;
-  Object.values(DB.auditoria).reverse().slice(0,120).forEach(log => {
+  let html = `<table><thead><tr><th>ID Código</th><th>Cliente</th><th>Línea de Servicio</th><th>Total Proyecto</th><th>Acciones de Transformación Comercial</th></tr></thead><tbody>`;
+  Object.keys(DB.proyectos).forEach(k => {
+    const p = DB.proyectos[k];
     html += `<tr>
-      <td>${log.fecha} — ${log.hora}</td>
-      <td style="color:var(--accent2);font-weight:600">${log.usuario}</td>
-      <td><span class="badge badge-blue">${log.accion}</span></td>
-      <td><b>${log.modulo}</b></td>
-      <td style="font-family:monospace;font-size:11px;color:var(--text2);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title='${log.cambios}'>${log.cambios}</td>
+      <td><b>${p.metadata.id_proyecto}</b></td>
+      <td>${p.cliente.nombre_empresa}</td>
+      <td><span class="badge badge-blue">${p.proyecto.linea_servicio}</span></td>
+      <td style="font-weight:700; color:var(--green)">$${p.financiero.total_general.toFixed(2)}</td>
+      <td>
+        <button class="btn btn-primary btn-sm" onclick="openVisualizadorDocumentos('${k}')">📄 Transformar e Imprimir Documento</button>
+      </td>
     </tr>`;
   });
   html += '</tbody></table>';
   wrap.innerHTML = html;
 }
 
-/* ANALÍTICA CENTRAL (DASHBOARD ENGINE) */
-let chartFlujoObj = null; let chartServicioObj = null;
-function renderDashboard() {
-  document.getElementById('tasa-display').textContent = `Tasa Oficial: $1 = Bs ${DB.tasa.toFixed(2)}`;
+/* MOTOR DE TRANSFORMACIÓN COMERCIAL DE DOCUMENTOS (REGLAS DE NEGOCIO ESTRICTAS) */
+function openVisualizadorDocumentos(key) {
+  activeProjectKeyForDoc = key;
+  triggerTransformacionDoc('PROPUESTA'); // Carga la propuesta comercial por defecto
+  openModal('modal-documento-output');
+}
+
+function triggerTransformacionDoc(tipoAccion) {
+  const p = DB.proyectos[activeProjectKeyForDoc];
+  if(!p) return;
   
-  let ingresosTotalesUSD = 0;
-  let egresosTotalesUSD = 0;
-  let rentabilidadPorServicio = {};
+  const lienzo = document.getElementById('print-lienzo-pdf');
+  lienzo.innerHTML = ''; // Limpiar render anterior
 
-  Object.values(DB.movimientos || {}).forEach(m => {
-    let usdValue = m.moneda === 'BS' ? m.monto / DB.tasa : m.monto;
-    if(m.tipo === 'ingreso') {
-      ingresosTotalesUSD += usdValue;
-      if(m.servicio) { rentabilidadPorServicio[m.servicio] = (rentabilidadPorServicio[m.servicio] || 0) + usdValue; }
-    } else {
-      egresosTotalesUSD += usdValue;
-      if(m.servicio) { rentabilidadPorServicio[m.servicio] = (rentabilidadPorServicio[m.servicio] || 0) - usdValue; }
-    }
-  });
+  // 1. CONFIGURACIÓN DINÁMICA DE CABECERAS SEGÚN ACCIÓN
+  let tituloDocumento = "PROPUESTA DE SERVICIOS";
+  let muestraCintilloLegal = false;
+  let ocultarPrecios = false;
+  let conceptoCajaUnico = false;
+  let hitoTexto = "";
+  let hitoMonto = 0;
 
-  document.getElementById('dash-stats').innerHTML = `
-    <div class="stat-card"><div class="stat-label">Ingresos Consolidados</div><div class="stat-val green">$${ingresosTotalesUSD.toFixed(2)}</div></div>
-    <div class="stat-card"><div class="stat-label">Gastos Compilados</div><div class="stat-val red">$${egresosTotalesUSD.toFixed(2)}</div></div>
-    <div class="stat-card"><div class="stat-label">Utilidad Neta Líquida</div><div class="stat-val ${ingresosTotalesUSD - egresosTotalesUSD >= 0 ? 'green' : 'red'}">$${(ingresosTotalesUSD - egresosTotalesUSD).toFixed(2)}</div></div>
-    <div class="stat-card"><div class="stat-label">Tickets Abiertos (Kanban)</div><div class="stat-val purple">${Object.values(DB.ordenes || {}).filter(o=>o.estado==='pendiente'||o.estado==='en_proceso').length}</div></div>
+  if(tipoAccion === 'OS_INTERNA') {
+    tituloDocumento = "ORDEN DE SERVICIO INTERNA";
+    ocultarPrecios = true;
+  } else if(tipoAccion === 'PREFACTURA') {
+    tituloDocumento = "PREFACTURA DE CONTROL FINANCIERO";
+    muestraCintilloLegal = true;
+  } else if(tipoAccion === 'ANTICIPO') {
+    tituloDocumento = "SOLICITUD DE PAGO / RECIBO DE COBRANZA - ANTICIPO";
+    conceptoCajaUnico = true;
+    hitoTexto = `Primer hito correspondiente al anticipo por concepto de inicio de servicios para el proyecto [${p.proyecto.linea_servicio}]`;
+    hitoMonto = p.financiero.anticipo_monto || (p.financiero.total_general * 0.5);
+  } else if(tipoAccion === 'FINIQUITO') {
+    tituloDocumento = "SOLICITUD DE PAGO / RECIBO DE COBRANZA - FINIQUITO";
+    conceptoCajaUnico = true;
+    hitoTexto = `Segundo hito correspondiente al finiquito por concepto de cierre y entrega de entregables para el proyecto [${p.proyecto.linea_servicio}]`;
+    hitoMonto = p.financiero.finiquito_monto || (p.financiero.total_general * 0.5);
+  }
+
+  // 2. INYECCIÓN ESTRUCTURAL DE HTML EDITORIAL CON EL SVG INTEGRADO
+  let htmlDoc = `
+    <div class="pdf-header">
+      <div>
+        ${OIKOS_SVG_LOGO}
+        <div style="font-size:10px; font-weight:700; color:#626480; margin-top:4px">OIKOS MEDIA</div>
+      </div>
+      <div style="text-align:right">
+        <div class="pdf-title-doc">${tituloDocumento}</div>
+        <div style="font-size:12px; font-weight:700; color:#6c63ff; margin-top:4px">${p.metadata.id_proyecto}</div>
+      </div>
+    </div>
+
+    <table class="pdf-meta-table">
+      <tr>
+        <td><b>CLIENTE:</b> ${p.cliente.nombre_empresa}</td>
+        <td style="text-align:right"><b>FECHA EMISIÓN:</b> ${p.metadata.fecha_creacion}</td>
+      </tr>
+      <tr>
+        <td><b>ID FISCAL / RIF:</b> ${p.cliente.rif_id}</td>
+        <td style="text-align:right"><b>ASESOR ENLACE:</b> ${p.metadata.asesor || 'Consultor Oikos'}</td>
+      </tr>
+      <tr>
+        <td><b>CONTACTO:</b> ${p.cliente.contacto}</td>
+        <td style="text-align:right"><b>VERSIONADO:</b> Rev. ${p.metadata.version}</td>
+      </tr>
+    </table>
+
+    <div class="pdf-grid-details">
+      <div>
+        <div style="font-weight:700; color:#6c63ff; margin-bottom:4px; text-transform:uppercase; font-size:11px">Especificaciones de Pauta / Logística</div>
+        <div><b>Línea de Servicio:</b> ${p.proyecto.linea_servicio}</div>
+        ${p.proyecto.tiempo_pauta ? `<div><b>Tiempo de Pauta / Duración:</b> ${p.proyecto.tiempo_pauta}</div>` : ''}
+        ${p.proyecto.jornadas_totales ? `<div><b>Jornadas de Grabación:</b> ${p.proyecto.jornadas_totales}</div>` : ''}
+      </div>
+      <div>
+        <div style="font-weight:700; color:#6c63ff; margin-bottom:4px; text-transform:uppercase; font-size:11px">Ubicación y Cronograma</div>
+        ${p.proyecto.fecha_evento ? `<div><b>Fecha Comprometida:</b> ${p.proyecto.fecha_evento}</div>` : ''}
+        ${p.proyecto.horario ? `<div><b>Bloque Horario:</b> ${p.proyecto.horario}</div>` : ''}
+        ${p.proyecto.lugar ? `<div><b>Locación / Estudio:</b> ${p.proyecto.lugar}</div>` : ''}
+      </div>
+    </div>
+
+    <div style="font-size:12px; margin-bottom:20px; color:#333; background:#fff; padding:10px; border-left:3px solid #6c63ff">
+      <b>Alcance Estratégico General:</b> ${p.proyecto.reach_general || p.proyecto.alcance_general || 'Servicios profesionales llave en mano de producción de contenidos.'}
+    </div>
   `;
 
-  const ctxFlujo = document.getElementById('chart-flujo').getContext('2d');
-  if(chartFlujoObj) chartFlujoObj.destroy();
-  chartFlujoObj = new Chart(ctxFlujo, {
-    type: 'bar',
-    data: { labels: ['Ingresos de Caja', 'Egresos / Gastos'], datasets: [{ data: [ingresosTotalesUSD, egresosTotalesUSD], backgroundColor: ['rgba(34,197,94,.75)', 'rgba(239,68,68,.75)'] }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+  // RENDERING DE TABLA DE ÍTEMS CON REGLA DE DINAMISMO (OCULTAR PRECIOS SI ES OS)
+  htmlDoc += `<table class="pdf-table"><thead><tr>`;
+  if(ocultarPrecios) {
+    htmlDoc += `<th>Categoría</th><th>Checklist Técnico / Entregables y Material Requerido</th><th>Cantidad</th><th>Unidad</th></tr></thead><tbody>`;
+  } else {
+    htmlDoc += `<th>Categoría</th><th>Descripción Comercial / Entregable</th><th>Cant.</th><th>Unidad</th><th style="text-align:right">Precio U.</th><th style="text-align:right">Total</th></tr></thead><tbody>`;
+  }
+
+  if(conceptoCajaUnico) {
+    // Modo solicitud de pago / hitos consolidados
+    htmlDoc += `<tr>
+      <td>Financiero</td>
+      <td><b>${hitoTexto}</b></td>
+      <td>1</td>
+      <td>Hito</td>
+      <td style="text-align:right">$${hitoMonto.toFixed(2)}</td>
+      <td style="text-align:right">$${hitoMonto.toFixed(2)}</td>
+    </tr>`;
+  } else {
+    // Desglose completo estructural
+    p.items.forEach(item => {
+      htmlDoc += `<tr>
+        <td><span style="font-size:10px; font-weight:700; background:#f0f1f7; padding:2px 6px; border-radius:4px">${item.categoria}</span></td>
+        <td><b>${item.concepto}</b></td>
+        <td>${item.cantidad}</td>
+        <td>${item.unidad}</td>
+        ${!ocultarPrecios ? `<td style="text-align:right">$${item.precio_unitario.toFixed(2)}</td>` : ''}
+        ${!ocultarPrecios ? `<td style="text-align:right; font-weight:700">$${item.total.toFixed(2)}</td>` : ''}
+      </tr>`;
+    });
+  }
+
+  htmlDoc += `</tbody></table>`;
+
+  // BLOQUE DE TOTALES Y CONDICIONES (REGLA DE OCULTACIÓN SI TOTAL ES 0)
+  if(!ocultarPrecios) {
+    const finalDisplayTotal = conceptoCajaUnico ? hitoMonto : p.financiero.total_general;
+    htmlDoc += `
+      <div style="display:flex; justify-content:space-between; margin-top:20px; font-size:11px">
+        <div style="max-width:400px; color:#555">
+          <div style="font-weight:700; color:#1a1a1a; margin-bottom:4px; text-transform:uppercase">Términos de Negociación y Métodos</div>
+          <div><b>Esquema Aprobado:</b> ${p.financiero.esquema_pago}</div>
+          <div><b>Canales de Recepción Habilitados:</b> ${p.financiero.metodos_permitidos.join(', ')}</div>
+          <div style="margin-top:6px; font-size:10px; color:#888">Las pautas audiovisuales requieren la validación del anticipo para el bloqueo de agenda técnica de equipos y talento en el estudio.</div>
+        </div>
+        <div class="pdf-totals">
+          <div class="pdf-totals-row"><span>Subtotal Neto:</span><span>$${finalDisplayTotal.toFixed(2)}</span></div>
+          ${p.financiero.impuestos > 0 ? `<div class="pdf-totals-row"><span>Impuestos / IVA:</span><span>$${p.financiero.impuestos.toFixed(2)}</span></div>` : ''}
+          <div class="pdf-totals-row" style="border-top:2px solid #6c63ff; font-weight:800; font-size:14px; color:#6c63ff">
+            <span>Total General:</span><span>$${finalDisplayTotal.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    // Si es OS Interna, mostramos espacio para firmas de operadores técnicos en Venezuela
+    htmlDoc += `
+      <div style="margin-top:50px; display:flex; justify-content:space-between; font-size:11px; text-align:center">
+        <div style="width:200px; border-top:1px solid #aaa; padding-top:8px; color:#626480">Productor Ejecutivo / Asesor</div>
+        <div style="width:200px; border-top:1px solid #aaa; padding-top:8px; color:#626480">Director Técnico de Pauta</div>
+        <div style="width:200px; border-top:1px solid #aaa; padding-top:8px; color:#626480">Checklist Operador Logístico</div>
+      </div>
+    `;
+  }
+
+  // CINTILLO OBLIGATORIO DE CONTROL FINANCIERO (PREFACTURA)
+  if(muestraCintilloLegal) {
+    htmlDoc += `<div class="pdf-cintillo-legal">DOCUMENTO EMITIDO EXCLUSIVAMENTE PARA CONTROL FINANCIERO INTERNO. NO POSEE VALIDEZ FISCAL.</div>`;
+  }
+
+  lienzo.innerHTML = htmlDoc;
+}
+
+/* DESCARGA DE ARCHIVOS PDF A4 A 300 DPI NATIVOS */
+function downloadPDFNative() {
+  const element = document.getElementById('print-lienzo-pdf');
+  const opt = {
+    margin:       10,
+    filename:     `OIKOS_DOC_${document.getElementById('proy-meta-id')?.textContent || Date.now()}.pdf`,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  html2pdf().set(opt).from(element).save();
+}
+
+/* NOTAS DE DÉBITO COMPLEMENTARIAS (CARGOS ADICIONALES EXTRA EN PRODUCCIÓN) */
+function openNotaDebitoModal() {
+  document.getElementById('nd-concepto').value = '';
+  document.getElementById('nd-desc').value = '';
+  document.getElementById('nd-monto').value = '';
+  openModal('modal-nota-debito');
+}
+function saveNotaDebitoAction() {
+  const p = DB.proyectos[activeProjectKeyForDoc];
+  const extraMonto = parseFloat(document.getElementById('nd-monto').value) || 0;
+  const concepto = document.getElementById('nd-concepto').value.trim();
+  if(!concepto || !extraMonto) return alert('Debes rellenar concepto y monto.');
+
+  const nuevoTotal = p.financiero.total_general + extraMonto;
+  
+  // Modificar e inyectar el ítem extra en la Célula Madre de Datos de Firebase
+  const copiaItems = [...p.items];
+  copiaItems.push({
+    categoria: 'Nota Débito Extra',
+    concepto: `Nota de Débito: ${concepto}`,
+    descripcion: document.getElementById('nd-desc').value.trim(),
+    cantidad: 1, unidad: 'Cargo Extra',
+    precio_unitario: extraMonto, total: extraMonto
   });
 
-  const ctxServ = document.getElementById('chart-servicios-rent').getContext('2d');
-  if(chartServicioObj) chartServicioObj.destroy();
-  chartServicioObj = new Chart(ctxServ, {
-    type: 'doughnut',
-    data: {
-      labels: Object.keys(rentabilidadPorServicio),
-      datasets: [{ data: Object.values(rentabilidadPorServicio), backgroundColor: ['#6c63ff', '#14b8a6', '#f59e0b', '#a855f7', '#ef4444', '#3b82f6'] }]
-    },
-    options: { responsive: true, maintainAspectRatio: false }
+  window._fbUpdate(window._fbRef(window._fbDB, 'oikos_v4_data/proyectos/' + activeProjectKeyForDoc), {
+    'items': copiaItems,
+    'financiero/total_general': nuevoTotal,
+    'financiero/subtotal': p.financiero.subtotal + extraMonto
+  }).then(() => {
+    logSystemAction('Nota de Débito Inyectada', 'Finanzas', p.metadata.id_proyecto, { cargoExtra: extraMonto, concepto });
+    closeModal('modal-nota-debito');
+    triggerTransformacionDoc('PROPUESTA'); // Forzar rerender del visualizador comercial
   });
 }
 
-function saveTasa() {
-  const val = parseFloat(document.getElementById('tasa-input').value);
-  if(!val || val <= 0) return alert('La tasa introducida no es válida');
-  window._fbUpdate(window._fbRef(window._fbDB, 'oikos_enterprise'), { tasa: val });
-  logAction('Actualización de Tasa Cambiaria', 'Configuración', 'Tasa Central', { valor: DB.tasa }, { valor: val });
-  closeModal('modal-tasa');
+/* DIAGRAMACIÓN DE COMPONENTES CORE RESTANTES */
+function renderDashboard() {
+  let pipelineUSD = 0;
+  Object.values(DB.proyectos || {}).forEach(p => pipelineUSD += p.financiero.total_general);
+  
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Pipeline Cotizado Total</div><div class="stat-val green">$${pipelineUSD.toFixed(2)}</div></div>
+    <div class="stat-card"><div class="stat-label">Proyectos en Célula Madre</div><div class="stat-val blue">${Object.keys(DB.proyectos || {}).length}</div></div>
+    <div class="stat-card"><div class="stat-label">Clientes en CRM</div><div class="stat-val purple">${Object.keys(DB.clientes || {}).length}</div></div>
+    <div class="stat-card"><div class="stat-label">Tasa Operativa Local</div><div class="stat-val amber">Bs ${DB.tasa}</div></div>
+  `;
+  
+  // Reset de Canvas analíticos
+  const c1 = document.getElementById('chart-flujo').getContext('2d');
+  new Chart(c1, { type: 'bar', data: { labels: ['Pipeline'], datasets: [{ data: [pipelineUSD], backgroundColor: ['#6c63ff'] }] }, options: { maintainAspectRatio:false } });
+  const c2 = document.getElementById('chart-servicios-rent').getContext('2d');
+  new Chart(c2, { type: 'doughnut', data: { labels: ['Producción', 'Streaming'], datasets: [{ data: [pipelineUSD, 0], backgroundColor: ['#6c63ff','#14b8a6'] }] }, options: { maintainAspectRatio:false } });
 }
+function renderKanban() { document.getElementById('kanban-board').innerHTML = '<div style="padding:20px; color:var(--text2)">Sincronizado vía Célula Madre. Consulta el nodo maestro en Proyectos Cotizados.</div>'; }
+function renderMovimientos() { document.getElementById('movimientos-table-wrap').innerHTML = '<div style="padding:20px; color:var(--text2)">Historial financiero consolidado.</div>'; }
+function renderAuditoria() {
+  const wrap = document.getElementById('auditoria-table-wrap');
+  let html = `<table><thead><tr><th>Fecha / Hora</th><th>Operador</th><th>Acción</th><th>Módulo</th></tr></thead><tbody>`;
+  Object.values(DB.auditoria || {}).reverse().slice(0,30).forEach(log => {
+    html += `<tr><td>${log.fecha} ${log.hour || log.hora}</td><td>${log.usuario}</td><td><span class="badge badge-amber">${log.accion}</span></td><td><b>${log.modulo}</b></td></tr>`;
+  });
+  html += '</tbody></table>'; wrap.innerHTML = html;
+}
+function saveTasa() { const v = parseFloat(document.getElementById('tasa-input').value); if(v>0){ window._fbUpdate(window._fbRef(window._fbDB, 'oikos_v4_data'), {tasa: v}); closeModal('modal-tasa'); } }
 </script>
 </body>
 </html>
