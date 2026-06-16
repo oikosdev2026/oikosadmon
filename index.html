@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Oikos Admon v5.5 — Ultimate Responsive Studio</title>
+<title>Oikos Admon v5.6 — Ultimate Responsive Studio</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -56,7 +56,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .loader{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* DISEÑO RESPONSIVO NATIVO: MENÚ Y CONTENEDOR */
+/* NAVEGACIÓN Y MENU RESPONSIVO */
 #nav{position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--bg2);border-right:1px solid var(--border);z-index:100;overflow-y:auto;padding:24px 0;display:none}
 #nav.visible{display:block}
 .nav-logo{padding:0 24px 16px;font-size:16px;font-weight:700;color:var(--accent2);border-bottom:1px solid var(--border)}
@@ -68,20 +68,20 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .nav-item:hover{background:var(--bg3);color:var(--text)}
 .nav-item.active{background:var(--accent3);color:var(--accent2);border-left:4px solid var(--accent);font-weight:600}
 
-/* RESPONSIVIDAD PARA EL MAIN */
+/* CONTROL RESPONSIVO DE CONTENEDOR */
 #main{margin-left:240px;padding:32px;min-height:100vh;display:none}
 #main.visible{display:block}
 .page{display:none}.page.active{display:block}
 .page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;border-bottom:1px solid var(--border);padding-bottom:16px;flex-wrap:wrap;gap:12px}
 .page-title{font-size:22px;font-weight:600}
 
-/* MEDIA QUERIES PARA PANTALLAS MÓVILES Y IPADS */
 @media(max-width:1024px){
-  #nav{width:100%;height:60px;bottom:auto;right:0;display:flex !important;padding:0;align-items:center;justify-content:space-between;border-right:none;border-bottom:1px solid var(--border)}
-  .nav-logo, .nav-user, .nav-section, .nav-item{padding:6px 12px;margin:0;border:none;background:transparent}
-  .nav-logo span, .nav-section, .nav-user{display:none !important}
-  .nav-menu-scroll{display:flex;overflow-x:auto;width:100%}
-  #main{margin-left:0;padding:80px 16px 24px 16px}
+  #nav{width:100%;height:60px;bottom:auto;right:0;display:flex !important;padding:0;align-items:center;justify-content:flex-start;border-right:none;border-bottom:1px solid var(--border)}
+  .nav-logo, .nav-user, .nav-section{display:none !important}
+  .nav-menu-scroll{display:flex;overflow-x:auto;width:100%;white-space:nowrap}
+  .nav-item{padding:18px 16px;font-size:12px;display:inline-block}
+  .nav-item.active{border-left:none;border-bottom:3px solid var(--accent)}
+  #main{margin-left:0;padding:85px 16px 24px 16px}
 }
 
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}
@@ -107,10 +107,10 @@ td{padding:14px;border-top:1px solid var(--border);color:var(--text);line-height
 .btn-success{background:var(--green-bg);color:var(--green);border:1px solid var(--green)}
 
 .badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;text-transform:uppercase}
-.badge-green{background:var(--green-bg);color:var(--green)}.badge-red{background:var(--red-bg);color:var(--red)}.badge-amber{background:var(--amber-bg);color:var(--amber)}
+.badge-green{background:var(--green-bg);color:var(--green)}.badge-red{background:var(--red-bg);color:var(--red)}.badge-amber{background:rgba(245,158,11,0.12);color:var(--amber)}
 .chip{display:inline-flex;padding:4px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;font-size:11px;font-family:monospace}
 
-/* COMPONENTE MODAL RESPONSIVO */
+/* VENTANAS MODALES */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(3px);z-index:200;align-items:center;justify-content:center;padding:12px;overflow-y:auto}
 .modal-overlay.open{display:flex}
 .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:24px;width:100%;max-width:740px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 45px rgba(0,0,0,0.8)}
@@ -131,12 +131,11 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
 </head>
 <body>
 
-<!-- COMPONENTE ACCESO -->
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">🎬 Oikos Admon Pro</div>
-    <div style="font-size:12px; color:var(--text2); margin-bottom:24px; text-transform:uppercase">Studio Console v5.5</div>
-    <div class="login-err" id="login-err"></div>
+    <div style="font-size:12px; color:var(--text2); margin-bottom:24px; text-transform:uppercase">Studio Console v5.6</div>
+    <div class="login-err" id="login-err" style="color:var(--red); font-size:12px; margin-bottom:10px; display:none"></div>
     <div class="form-group"><label>Email Corporativo</label><input type="email" id="login-email" placeholder="usuario@oikos.media"></div>
     <div class="form-group"><label>Contraseña</label><input type="password" id="login-pass" placeholder="••••••••"></div>
     <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doLogin()">Iniciar Sistema</button>
@@ -145,7 +144,6 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
 
 <div id="loading-screen" class="hidden"><div class="loader"></div><div class="load-text">Estructurando Célula Madre Operativa...</div></div>
 
-<!-- BARRA DE NAVEGACIÓN -->
 <nav id="nav">
   <div class="nav-logo">Oikos Admon Pro<span>Studio Administration</span></div>
   <div class="nav-user"><span id="nav-user-email">...</span><button class="btn btn-ghost btn-sm" onclick="doLogout()">⏻</button></div>
@@ -163,12 +161,10 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
 
 <main id="main">
 
-  <!-- DASHBOARD OPERATIVO -->
   <div id="page-dashboard" class="page active">
     <div class="page-header">
       <div class="page-title">Dashboard Operativo Consolidado</div>
-      <!-- BOTÓN DE ACCESO DIRECTO SOLICITADO -->
-      <button class="btn btn-primary" onclick="prepareNewProyecto()">+ Crear Proyecto Master</button>
+      <button class="btn btn-primary" onclick="prepareNewProyecto()">+ Nuevo Proyecto</button>
     </div>
     <div class="stats-grid" id="dash-stats"></div>
     
@@ -191,51 +187,43 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
     </div>
   </div>
 
-  <!-- SECCIÓN GESTIÓN LINEAS DE SERVICIO REALES -->
   <div id="page-servicios" class="page">
     <div class="page-header"><div class="page-title">Configuración de Líneas de Servicio</div><button class="btn btn-primary" onclick="openNewServicioModal()">+ Agregar Línea de Servicio</button></div>
     <div class="card"><div class="table-wrap" id="servicios-table-wrap"></div></div>
   </div>
 
-  <!-- CELULA MADRE -->
   <div id="page-proyectos_cotizados" class="page">
     <div class="page-header"><div class="page-title">Célula Madre de Proyectos</div><button class="btn btn-primary" onclick="prepareNewProyecto()">+ Crear Proyecto Maestro</button></div>
     <div class="card"><div class="table-wrap" id="proyectos-table-wrap"></div></div>
   </div>
 
-  <!-- CRM -->
   <div id="page-clientes" class="page">
     <div class="page-header"><div class="page-title">CRM de Clientes</div><button class="btn btn-primary" onclick="prepareNewCliente()">+ Nuevo Cliente</button></div>
     <div id="clientes-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px"></div>
   </div>
 
-  <!-- ORDENES -->
   <div id="page-ordenes" class="page">
     <div class="page-header"><div><div class="page-title">Órdenes de Servicio</div></div><button class="btn btn-primary" onclick="prepareNewOS()">+ Crear Nueva OS</button></div>
     <div id="os-list"></div>
   </div>
 
-  <!-- GASTOS -->
   <div id="page-gastos" class="page">
     <div class="page-header"><div><div class="page-title">Estructura de Gastos y Costos</div></div><button class="btn btn-primary" onclick="prepareNewGasto()">+ Registrar Gasto / Costo</button></div>
     <div class="card"><div class="table-wrap" id="gastos-table-wrap"></div></div>
   </div>
 
-  <!-- PERSONAL -->
   <div id="page-personal" class="page">
     <div class="page-header"><div><div class="page-title">Equipo Humano &amp; Comisiones</div></div><button class="btn btn-primary" onclick="prepareNewPersonal()">+ Alta Integrante</button></div>
     <div class="card"><div class="card-title">Cálculo Automático de Comisiones por Proyecto</div><div class="table-wrap" id="comisiones-auto-table-wrap"></div></div>
     <div class="card" style="margin-top:20px"><div class="card-title">Estructura del Equipo</div><div class="table-wrap" id="personal-table-wrap"></div></div>
   </div>
 
-  <!-- AUDITORIA -->
   <div id="page-auditoria" class="page">
     <div class="page-header"><div class="page-title">Logs de Auditoría</div></div>
     <div class="card"><div class="table-wrap" id="auditoria-table-wrap"></div></div>
   </div>
 </main>
 
-<!-- MODAL LÍNEA DE SERVICIO -->
 <div class="modal-overlay" id="modal-servicio-form"><div class="modal" style="width:400px">
   <h3>Línea de Servicio</h3>
   <input type="hidden" id="ser-id">
@@ -243,7 +231,6 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
   <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-servicio-form')">Cancelar</button><button class="btn btn-primary" onclick="saveServicioAction()">Guardar Línea</button></div>
 </div></div>
 
-<!-- MODAL CÉLULA MADRE CENTRAL -->
 <div class="modal-overlay" id="modal-proyecto"><div class="modal" style="width:780px">
   <h3>Estructura "Célula Madre" del Proyecto</h3>
   <input type="hidden" id="proy-id">
@@ -254,13 +241,11 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
   </div>
   <div class="form-row">
     <div class="form-group"><label>Cliente Titular</label><select id="proy-cli-select"></select><button class="btn btn-success btn-sm" style="margin-top:6px;width:100%;justify-content:center" onclick="openFastClienteModal()">+ Registrar Express Cliente</button></div>
-    <!-- EXPLICITACIÓN DEL NÚMERO DE CONTACTO SOLICITADO -->
     <div class="form-group"><label>Nombre del Contacto Directo del Cliente</label><input type="text" id="proy-cli-contacto" placeholder="Persona encargada de validar entregables"></div>
   </div>
 
   <h4 style="margin:16px 0 8px; color:var(--accent); font-size:13px; text-transform:uppercase">Especificaciones Técnicas</h4>
   <div class="form-row">
-    <!-- DESPLEGABLE DINÁMICO DE LÍNEAS DE SERVICIO REALES -->
     <div class="form-group"><label>Línea de Servicio Real</label><select id="proy-tech-linea-select"></select></div>
     <div class="form-group"><label>Tiempo de Pauta / Duración</label><input type="text" id="proy-tech-pauta"></div>
   </div>
@@ -280,9 +265,7 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
 
   <h4 style="margin:16px 0 8px; color:var(--accent); font-size:13px; text-transform:uppercase">Estructura Financiera de la Propuesta</h4>
   <div class="form-row">
-    <!-- INCLUSIÓN DE LA OPCIÓN DE EURO EN MONEDA BASE -->
     <div class="form-group"><label>Moneda Base (Cotización)</label><select id="proy-fin-moneda"><option value="USD">USD ($)</option><option value="EUR">Euro (€)</option><option value="BS">Bolívares (Bs)</option></select></div>
-    <!-- SELECCIÓN ESTRUCTURADA DE ESQUEMAS DE PAGO -->
     <div class="form-group"><label>Esquema de Pago Comercial</label><select id="proy-fin-esquema-select" onchange="checkCustomPaymentSchema()"><option value="70 - 30">70% Anticipo / 30% Finiquito</option><option value="100%">100% Anticipado</option><option value="Personalizado">Esquema Personalizado...</option></select><input type="text" id="proy-fin-esquema-custom" placeholder="Especificar hito" style="display:none; margin-top:6px"></div>
   </div>
   <div class="form-row">
@@ -293,14 +276,12 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
   <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-proyecto')">Cancelar</button><button class="btn btn-primary" onclick="saveProyectoMasterAction()">Guardar Célula Madre</button></div>
 </div></div>
 
-<!-- MODAL CAMBIO TASA -->
 <div class="modal-overlay" id="modal-tasa"><div class="modal" style="width:340px">
   <h3>Actualizar Tasa de Cambio</h3>
   <div class="form-group"><label>Valor 1 USD en Bs</label><input type="number" id="tasa-input" step="0.01"></div>
   <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-tasa')">Cerrar</button><button class="btn btn-primary" onclick="saveTasa()">Actualizar</button></div>
 </div></div>
 
-<!-- MODAL CLIENTE CRM -->
 <div class="modal-overlay" id="modal-cliente"><div class="modal" style="width:420px"><h3>Ficha Cliente CRM</h3><input type="hidden" id="cli-id">
   <div class="form-group"><label>Razón Social / Empresa</label><input type="text" id="cli-nombre"></div>
   <div class="form-group"><label>RIF / Identificación Fiscal</label><input type="text" id="cli-rif"></div>
@@ -308,7 +289,6 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
   <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-cliente')">Cancelar</button><button class="btn btn-primary" onclick="saveClienteAction()">Guardar Cliente</button></div>
 </div></div>
 
-<!-- MODAL EXPRESS CLIENTE -->
 <div class="modal-overlay" id="modal-fast-cliente" style="z-index:300"><div class="modal" style="width:380px">
   <h3>+ Registro Express de Cliente</h3>
   <div class="form-group"><label>Nombre Empresa</label><input type="text" id="fast-cli-nombre"></div>
@@ -316,7 +296,6 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
   <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-fast-cliente')">Cerrar</button><button class="btn btn-primary" onclick="saveFastClienteAction()">Inyectar</button></div>
 </div></div>
 
-<!-- ORDEN DE SERVICIO -->
 <div class="modal-overlay" id="modal-os"><div class="modal" style="width:460px"><h3>Orden de Servicio Técnico</h3><input type="hidden" id="os-id">
   <div class="form-group"><label>Cliente Titular</label><select id="os-cliente"></select></div>
   <div class="form-group"><label>Línea de Servicio Real</label><select id="os-servicio-select"></select></div>
@@ -326,7 +305,6 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
   <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-os')">Cancelar</button><button class="btn btn-primary" onclick="saveOSAction()">Guardar OS</button></div>
 </div></div>
 
-<!-- GASTOS -->
 <div class="modal-overlay" id="modal-gasto"><div class="modal" style="width:460px"><h3>Gasto / Costo de Proyecto</h3><input type="hidden" id="gasto-id">
   <div class="form-group"><label>Concepto del Gasto</label><input type="text" id="gasto-concepto"></div>
   <div class="form-row"><div class="form-group"><label>Monto Neto (USD)</label><input type="number" id="gasto-monto" step="0.01"></div><div class="form-group"><label>Fecha Operación</label><input type="date" id="gasto-fecha"></div></div>
@@ -337,7 +315,6 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
   <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-gasto')">Cancelar</button><button class="btn btn-primary" onclick="saveGastoAction()">Procesar Gasto</button></div>
 </div></div>
 
-<!-- PERSONAL -->
 <div class="modal-overlay" id="modal-personal"><div class="modal" style="width:450px"><h3>Ficha Integrante Equipo</h3><input type="hidden" id="pers-id">
   <div class="form-group"><label>Nombre Completo</label><input type="text" id="pers-nombre"></div>
   <div class="form-group"><label>Cargo / Especialidad</label><input type="text" id="pers-cargo"></div>
@@ -350,14 +327,13 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
   <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-personal')">Cancelar</button><button class="btn btn-primary" onclick="savePersonalAction()">Guardar Ficha</button></div>
 </div></div>
 
-<!-- LIENZO PDF EDITORIAL -->
 <div class="modal-overlay" id="modal-documento-output"><div class="modal" style="width:880px; background:var(--bg3)">
   <h3>Generador Editorial de Documentos</h3>
   <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap">
     <button class="btn btn-ghost btn-sm" onclick="triggerTransformacionDoc('PROPUESTA')">Propuesta de Servicios</button>
     <button class="btn btn-ghost btn-sm" onclick="triggerTransformacionDoc('OS_INTERNA')">Orden de Servicio Interna</button>
     <button class="btn btn-ghost btn-sm" onclick="triggerTransformacionDoc('PREFACTURA')">Prefactura Interna</button>
-    <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="downloadPDFNative()">⬇ Descargar PDF Nivel Imprenta</button>
+    <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="downloadPDFNative()">⬇ Descargar PDF</button>
   </div>
   <div style="overflow-y:auto; max-height:60vh; background:#444; padding:20px; border-radius:8px"><div id="print-lienzo-pdf" class="pdf-preview-box"></div></div>
   <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-documento-output')">Cerrar</button></div>
@@ -368,6 +344,10 @@ let DB = { tasa: 45, clientes: {}, proyectos: {}, ordenes: {}, gastos: {}, perso
 let currentUser = null; let activeProjectKeyForDoc = null;
 
 const OIKOS_SVG_LOGO = `<svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M50 5L15 40H35V95H65V40H85L50 5Z" fill="#6c63ff"/><circle cx="50" cy="55" r="12" fill="#ffffff"/></svg>`;
+
+// CONTROL DE MODALES GLOBAL
+window.openModal = function(id) { document.getElementById(id).classList.add('open'); };
+window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); };
 
 window.addEventListener('firebase-ready', () => {
   window._fbOnAuth(window._fbAuth, user => {
@@ -399,15 +379,6 @@ function initRealtimeSync() {
   });
 }
 
-function logSystemAction(accion, modulo, idItem, detalles) {
-  const nRef = window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/auditoria'));
-  window._fbSet(nRef, {
-    usuario: currentUser ? currentUser.email : 'Sistema',
-    accion, modulo, idItem, detalles: JSON.stringify(detalles),
-    fecha: new Date().toLocaleDateString('es-VE'), hora: new Date().toLocaleTimeString('es-VE')
-  });
-}
-
 function syncSelectDropdowns() {
   const proyCli = document.getElementById('proy-cli-select'); const osCli = document.getElementById('os-cliente');
   const osResp = document.getElementById('os-responsable'); const gastoProy = document.getElementById('gasto-proyecto-vinculo');
@@ -425,41 +396,28 @@ function syncSelectDropdowns() {
   Object.keys(DB.proyectos).forEach(k => { gProyHtml += `<option value="${DB.proyectos[k].metadata.id_proyecto}">${DB.proyectos[k].metadata.id_proyecto} - ${DB.proyectos[k].proyecto.linea_servicio}</option>`; });
   if(gastoProy) gastoProy.innerHTML = gProyHtml;
 
-  // Inyección de servicios de forma dinámica
   let servHtml = '';
   Object.values(DB.servicios).forEach(s => { servHtml += `<option value="${s.nombre}">${s.nombre}</option>`; });
   if(!Object.keys(DB.servicios).length) { servHtml = '<option value="Producción Audiovisual">Producción Audiovisual</option><option value="Broadcast / Streaming">Broadcast / Streaming</option>'; }
   if(proyServ) proyServ.innerHTML = servHtml; if(osServ) osServ.innerHTML = servHtml;
 }
 
-function checkCustomPaymentSchema() {
-  const select = document.getElementById('proy-fin-esquema-select').value;
-  document.getElementById('proy-fin-esquema-custom').style.display = select === 'Personalizado' ? 'block' : 'none';
-}
-
-function toggleComissionInputs() {
-  const val = document.getElementById('pers-aplica-com').value;
-  document.getElementById('row-comision-config').style.display = val === 'si' ? 'block' : 'none';
-}
-
-const today=()=>new Date().toISOString().split('T')[0];
-
-async function doLogin() {
-  const email = document.getElementById('login-email').value.trim(); const pass = document.getElementById('login-pass').value;
-  try { await window._fbSignIn(window._fbAuth, email, pass); } catch(e) { document.getElementById('login-err').textContent = "Acceso denegado."; document.getElementById('login-err').style.display='block'; }
-}
-async function doLogout() { if(confirm('¿Cerrar Sesión?')) await window._fbSignOut(window._fbAuth); }
-
-let currentPage = 'dashboard';
-function goto(page) {
+window.goto = function(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
-  document.querySelectorAll('.nav-menu-scroll .nav-item').forEach(i => {
-    if(i.getAttribute('onclick') && i.getAttribute('onclick').includes(`'${page}'`)) i.classList.add('active');
+  
+  // Resalta botón correcto en menú de escritorio/móvil
+  const items = document.querySelectorAll('.nav-item');
+  items.forEach(item => {
+    if(item.getAttribute('onclick') && item.getAttribute('onclick').includes(`'${page}'`)) {
+      item.classList.add('active');
+    }
   });
+  
   currentPage = page; renderPage(page);
-}
+};
+
 function renderCurrentPage() { renderPage(currentPage); }
 function renderPage(page) {
   if(page === 'dashboard') renderDashboard(); if(page === 'proyectos_cotizados') renderProyectosMaster();
@@ -468,18 +426,25 @@ function renderPage(page) {
   if(page === 'auditoria') renderAuditoria(); if(page === 'servicios') renderServicios();
 }
 
-/* CRUD LÍNEAS DE SERVICIO REALES */
-function openNewServicioModal() {
+/* AUTHENTICATION ROUTINES */
+window.doLogin = async function() {
+  const email = document.getElementById('login-email').value.trim(); const pass = document.getElementById('login-pass').value;
+  try { await window._fbSignIn(window._fbAuth, email, pass); } catch(e) { document.getElementById('login-err').textContent = "Acceso incorrecto."; document.getElementById('login-err').style.display='block'; }
+};
+window.doLogout = async function() { if(confirm('¿Cerrar Sesión?')) await window._fbSignOut(window._fbAuth); };
+
+/* OPERACIONES CRUD SERVICIOS */
+window.openNewServicioModal = function() {
   document.getElementById('ser-id').value = ''; document.getElementById('ser-nombre').value = ''; openModal('modal-servicio-form');
-}
-function saveServicioAction() {
+};
+window.saveServicioAction = function() {
   const id = document.getElementById('ser-id').value; const nombre = document.getElementById('ser-nombre').value.trim();
   if(!nombre) return;
   if(id) { window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core/servicios/' + id), { nombre }); }
   else { window._fbSet(window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/servicios')), { nombre }); }
   closeModal('modal-servicio-form');
-}
-function deleteServicio(id) { if(confirm('¿Eliminar esta línea de servicio?')) window._fbRemove(window._fbRef(window._fbDB, 'oikos_stable_core/servicios/' + id)); }
+};
+window.deleteServicio = function(id) { if(confirm('¿Eliminar esta línea?')) window._fbRemove(window._fbRef(window._fbDB, 'oikos_stable_core/servicios/' + id)); };
 function renderServicios() {
   const wrap = document.getElementById('servicios-table-wrap'); wrap.innerHTML = '';
   let html = `<table><thead><tr><th>Nombre de la Unidad de Servicio</th><th>Acciones</th></tr></thead><tbody>`;
@@ -489,26 +454,26 @@ function renderServicios() {
   wrap.innerHTML = html + '</tbody></table>';
 }
 
-/* CRM */
-function prepareNewCliente() {
+/* OPERACIONES CRM */
+window.prepareNewCliente = function() {
   document.getElementById('cli-id').value = ''; document.getElementById('cli-nombre').value = '';
   document.getElementById('cli-rif').value = ''; document.getElementById('cli-estado').value = 'activo'; openModal('modal-cliente');
-}
-function saveClienteAction() {
+};
+window.saveClienteAction = function() {
   const id = document.getElementById('cli-id').value;
   const obj = { nombre: document.getElementById('cli-nombre').value.trim(), rif: document.getElementById('cli-rif').value, estado: document.getElementById('cli-estado').value };
   if(!obj.nombre) return;
   if(id) { window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core/clientes/' + id), obj); }
   else { window._fbSet(window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/clientes')), obj); }
   closeModal('modal-cliente');
-}
-function saveFastClienteAction() {
+};
+window.openFastClienteModal = function() { document.getElementById('fast-cli-nombre').value = ''; document.getElementById('fast-cli-rif').value = ''; openModal('modal-fast-cliente'); };
+window.saveFastClienteAction = function() {
   const nombre = document.getElementById('fast-cli-nombre').value.trim(); if(!nombre) return;
   const obj = { nombre, rif: document.getElementById('fast-cli-rif').value, estado: 'activo' };
   const nRef = window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/clientes'));
   window._fbSet(nRef, obj).then(() => { syncSelectDropdowns(); document.getElementById('proy-cli-select').value = nRef.key; closeModal('modal-fast-cliente'); });
-}
-function openFastClienteModal() { document.getElementById('fast-cli-nombre').value = ''; document.getElementById('fast-cli-rif').value = ''; openModal('modal-fast-cliente'); }
+};
 function renderClientes() {
   const grid = document.getElementById('clientes-grid'); grid.innerHTML = '';
   Object.keys(DB.clientes).forEach(k => {
@@ -517,8 +482,8 @@ function renderClientes() {
   });
 }
 
-/* ÍTEMS */
-function addTableRowItem(cat='', con='', cant=1, uni='Pauta', pre=0) {
+/* CONTROL DINÁMICO DE FILAS */
+window.addTableRowItem = function(cat='', con='', cant=1, uni='Pauta', pre=0) {
   const container = document.getElementById('items-builder-container');
   const div = document.createElement('div'); div.className = 'item-builder-row'; div.style.display = 'grid'; div.style.gridTemplateColumns = '1.2fr 2fr 0.8fr 1fr 1fr auto'; div.style.gap = '8px'; div.style.marginBottom = '8px';
   div.innerHTML = `
@@ -530,10 +495,11 @@ function addTableRowItem(cat='', con='', cant=1, uni='Pauta', pre=0) {
     <button class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">X</button>
   `;
   container.appendChild(div);
-}
+};
 
-/* MASTER PROYECTOS */
-function prepareNewProyecto() {
+/* CÉLULA MADRE ENGINE */
+const today=()=>new Date().toISOString().split('T')[0];
+window.prepareNewProyecto = function() {
   document.getElementById('proy-id').value = ''; document.getElementById('proy-meta-id').value = 'PROY-2026-' + Math.floor(1000 + Math.random() * 9000);
   document.getElementById('proy-meta-asesor').value = ''; document.getElementById('proy-cli-select').value = '';
   document.getElementById('proy-cli-contacto').value = ''; document.getElementById('proy-tech-pauta').value = '';
@@ -541,11 +507,12 @@ function prepareNewProyecto() {
   document.getElementById('proy-tech-horario').value = ''; document.getElementById('proy-tech-lugar').value = '';
   document.getElementById('proy-tech-alcance').value = ''; document.getElementById('proy-fin-anticipo').value = 0;
   document.getElementById('proy-fin-finiquito').value = 0; document.getElementById('items-builder-container').innerHTML = '';
-  addTableRowItem('Producción', 'Servicio Técnico Base', 1, 'Proyecto', 1500); openModal('modal-proyecto');
-}
-function saveProyectoMasterAction() {
+  addTableRowItem('Producción', 'Servicio Técnico Base', 1, 'Proyecto', 1000); openModal('modal-proyecto');
+};
+
+window.saveProyectoMasterAction = function() {
   const key = document.getElementById('proy-id').value; const cliKey = document.getElementById('proy-cli-select').value;
-  if(!cliKey) return alert('Cliente requerido.');
+  if(!cliKey) return alert('Por favor, selecciona un cliente corporativo.');
   const itemsArray = []; let sub = 0;
   document.querySelectorAll('#items-builder-container .item-builder-row').forEach(row => {
     const cant = parseFloat(row.querySelector('.item-cant').value) || 0; const pre = parseFloat(row.querySelector('.item-pre').value) || 0;
@@ -560,27 +527,27 @@ function saveProyectoMasterAction() {
     cliente: { nombre_empresa: DB.clientes[cliKey].nombre, rif_id: DB.clientes[cliKey].rif || '—', contacto: document.getElementById('proy-cli-contacto').value, telefono: '—' },
     proyecto: { linea_servicio: document.getElementById('proy-tech-linea-select').value, alcance_general: document.getElementById('proy-tech-alcance').value, tiempo_pauta: document.getElementById('proy-tech-pauta').value, jornadas_totales: parseInt(document.getElementById('proy-tech-jornadas').value), fecha_evento: document.getElementById('proy-tech-fecha').value, horario: document.getElementById('proy-tech-horario').value, lugar: document.getElementById('proy-tech-lugar').value },
     items: itemsArray,
-    financiero: { moneda_base: document.getElementById('proy-fin-moneda').value, subtotal: sub, impuestos: 0, total_general: sub, esquema_pago: finalEsquema, anticipo_monto: parseFloat(document.getElementById('proy-fin-anticipo').value), finiquito_monto: parseFloat(document.getElementById('proy-fin-finiquito').value), metodos_permitidos: document.getElementById('proy-fin-metodos').value.split(',') }
+    financiero: { moneda_base: document.getElementById('proy-fin-moneda').value, subtotal: sub, impuestos: 0, total_general: sub, esquema_pago: finalEsquema, anticipo_monto: parseFloat(document.getElementById('proy-fin-anticipo').value), finiquito_monto: parseFloat(document.getElementById('proy-fin-finiquito').value), metodos_permitidos: [document.getElementById('proy-fin-metodos').value] }
   };
   if(key) { window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core/proyectos/' + key), obj); }
   else { window._fbSet(window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/proyectos')), obj); }
   closeModal('modal-proyecto');
-}
+};
+
 function renderProyectosMaster() {
   const wrap = document.getElementById('proyectos-table-wrap'); wrap.innerHTML = '';
-  if(!Object.keys(DB.proyectos).length) { wrap.innerHTML = '<div class="empty-state">No hay proyectos asignados en Célula Madre.</div>'; return; }
+  if(!Object.keys(DB.proyectos).length) { wrap.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text2)">No hay proyectos en Célula Madre.</div>'; return; }
   let html = `<table><thead><tr><th>Código Master</th><th>Cliente</th><th>Línea de Servicio</th><th>Total Presupuestado</th><th>Impresión Editorial</th></tr></thead><tbody>`;
   Object.keys(DB.proyectos).forEach(k => {
-    const p = DB.proyectos[k];
-    const sign = p.financiero.moneda_base === 'EUR' ? '€' : '$';
+    const p = DB.proyectos[k]; const sign = p.financiero.moneda_base === 'EUR' ? '€' : '$';
     html += `<tr><td><b>${p.metadata.id_proyecto}</b></td><td>${p.cliente.nombre_empresa}</td><td>${p.proyecto.linea_servicio}</td><td style="color:var(--green); font-weight:700">${sign}${p.financiero.total_general}</td><td><button class="btn btn-primary btn-sm" onclick="openVisualizadorDocumentos('${k}')">📄 PDF Engine</button></td></tr>`;
   });
   wrap.innerHTML = html + '</tbody></table>';
 }
 
-/* PDF ENGINE */
-function openVisualizadorDocumentos(key) { activeProjectKeyForDoc = key; triggerTransformacionDoc('PROPUESTA'); openModal('modal-documento-output'); }
-function triggerTransformacionDoc(tipo) {
+/* SECCIÓN EDITORIAL & PDF */
+window.openVisualizadorDocumentos = function(key) { activeProjectKeyForDoc = key; triggerTransformacionDoc('PROPUESTA'); openModal('modal-documento-output'); };
+window.triggerTransformacionDoc = function(tipo) {
   const p = DB.proyectos[activeProjectKeyForDoc]; if(!p) return;
   const lienzo = document.getElementById('print-lienzo-pdf');
   let title = "PROPUESTA DE SERVICIOS"; let cintillo = false; let maskPrice = false;
@@ -590,23 +557,23 @@ function triggerTransformacionDoc(tipo) {
 
   let body = `
     <div class="pdf-header"><div>${OIKOS_SVG_LOGO}<h4>OIKOS MEDIA</h4></div><div style="text-align:right"><h3>${title}</h3><h4 style="color:#6c63ff">${p.metadata.id_proyecto}</h4></div></div>
-    <div style="font-size:12px; margin-bottom:15px"><b>Empresa:</b> ${p.cliente.nombre_empresa} | <b>RIF:</b> ${p.cliente.rif_id}<br><b>Línea Real:</b> ${p.proyecto.linea_servicio} | <b>Contacto Enlace:</b> ${p.cliente.contacto}</div>
+    <div style="font-size:12px; margin-bottom:15px; color:#333"><b>Empresa:</b> ${p.cliente.nombre_empresa} | <b>RIF:</b> ${p.cliente.rif_id}<br><b>Línea Real:</b> ${p.proyecto.linea_servicio} | <b>Contacto Enlace:</b> ${p.cliente.contacto}<br><b>Esquema Comercial:</b> ${p.financiero.esquema_pago}</div>
     <table class="pdf-table"><thead><tr><th>Área / Cat.</th><th>Concepto Entregable</th><th>Cant.</th>${!maskPrice?'<th>Total</th>':''}</tr></thead><tbody>`;
   p.items.forEach(i => {
     body += `<tr><td>${i.categoria}</td><td>${i.concepto}</td><td>${i.cantidad}</td>${!maskPrice?`<td>${sign}${i.total}</td>`:''}</tr>`;
   });
   body += `</tbody></table>`;
   if(!maskPrice) body += `<div style="text-align:right; font-weight:700; font-size:14px; color:#6c63ff">Total General: ${sign}${p.financiero.total_general}</div>`;
-  if(cintillo) body += `<div class="pdf-cintillo-legal">DOCUMENTO EMITIDO EXCLUSIVAMENTE PARA CONTROL FINANCIERO INTERNO. NO POSEE VALIDEZ FISCAL.</div>`;
+  if(cintillo) body += `<div style="margin-top:20px; font-size:10px; color:red; text-align:center; font-weight:bold">DOCUMENTO EMITIDO EXCLUSIVAMENTE PARA CONTROL FINANCIERO INTERNO. NO POSEE VALIDEZ FISCAL.</div>`;
   lienzo.innerHTML = body;
-}
-function downloadPDFNative() { html2pdf().from(document.getElementById('print-lienzo-pdf')).save(`Oikos_Documento_${Date.now()}.pdf`); }
+};
+window.downloadPDFNative = function() { html2pdf().from(document.getElementById('print-lienzo-pdf')).save(`Oikos_Documento_${Date.now()}.pdf`); };
 
-/* LOGISTICA */
-function prepareNewOS() {
+/* GESTIÓN DE LOGÍSTICA */
+window.prepareNewOS = function() {
   document.getElementById('os-id').value = ''; document.getElementById('os-cliente').value = ''; document.getElementById('os-desc').value = ''; document.getElementById('os-monto').value = ''; openModal('modal-os');
-}
-function saveOSAction() {
+};
+window.saveOSAction = function() {
   const key = document.getElementById('os-id').value; const cliKey = document.getElementById('os-cliente').value; const respKey = document.getElementById('os-responsable').value;
   const obj = {
     clienteId: cliKey, clienteNombre: DB.clientes[cliKey]?.nombre || 'Externo',
@@ -617,7 +584,7 @@ function saveOSAction() {
   if(key) { window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core/ordenes/' + key), obj); }
   else { window._fbSet(window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/ordenes')), obj); }
   closeModal('modal-os');
-}
+};
 function renderOrdenes() {
   const container = document.getElementById('os-list'); container.innerHTML = '';
   Object.keys(DB.ordenes).forEach(k => {
@@ -626,11 +593,11 @@ function renderOrdenes() {
   });
 }
 
-/* CAJA */
-function prepareNewGasto() {
+/* ESTRUCTURACIÓN DE COSTOS */
+window.prepareNewGasto = function() {
   document.getElementById('gasto-id').value = ''; document.getElementById('gasto-concepto').value = ''; document.getElementById('gasto-monto').value = ''; document.getElementById('gasto-fecha').value = today(); openModal('modal-gasto');
-}
-function saveGastoAction() {
+};
+window.saveGastoAction = function() {
   const id = document.getElementById('gasto-id').value;
   const obj = {
     concepto: document.getElementById('gasto-concepto').value.trim(), monto: parseFloat(document.getElementById('gasto-monto').value) || 0,
@@ -639,7 +606,7 @@ function saveGastoAction() {
   if(id) { window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core/gastos/' + id), obj); }
   else { window._fbSet(window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/gastos')), obj); }
   closeModal('modal-gasto');
-}
+};
 function renderGastos() {
   const wrap = document.getElementById('gastos-table-wrap'); wrap.innerHTML = '';
   let html = `<table><thead><tr><th>Fecha Valor</th><th>Glosa / Concepto</th><th>Frecuencia</th><th>Código Proyecto</th><th>Monto USD</th></tr></thead><tbody>`;
@@ -650,11 +617,11 @@ function renderGastos() {
   wrap.innerHTML = html + '</tbody></table>';
 }
 
-/* STAFF */
-function prepareNewPersonal() {
+/* PERSONAL Y NÚCLEO DE COMISIONES */
+window.prepareNewPersonal = function() {
   document.getElementById('pers-id').value = ''; document.getElementById('pers-nombre').value = ''; document.getElementById('pers-cargo').value = ''; document.getElementById('pers-salario').value = 0; document.getElementById('pers-aplica-com').value = 'no'; toggleComissionInputs(); openModal('modal-personal');
-}
-function savePersonalAction() {
+};
+window.savePersonalAction = function() {
   const id = document.getElementById('pers-id').value;
   const obj = {
     nombre: document.getElementById('pers-nombre').value.trim(), cargo: document.getElementById('pers-cargo').value,
@@ -664,7 +631,7 @@ function savePersonalAction() {
   if(id) { window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core/personal/' + id), obj); }
   else { window._fbSet(window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/personal')), obj); }
   closeModal('modal-personal');
-}
+};
 function renderPersonal() {
   const wrap = document.getElementById('personal-table-wrap'); wrap.innerHTML = '';
   let html = `<table><thead><tr><th>Especialista</th><th>Cargo / Rol</th><th>Sueldo Base</th><th>Esquema</th></tr></thead><tbody>`;
@@ -694,29 +661,27 @@ function calcularYRenderizarComisionesAutomomaticas() {
   wrap.innerHTML = html + '</tbody></table>';
 }
 
-/* LOGS */
+/* HISTORIAL / AUDITORIA */
 function renderAuditoria() {
   const wrap = document.getElementById('auditoria-table-wrap');
   let html = `<table><thead><tr><th>Fecha / Hora</th><th>Usuario Operador</th><th>Módulo</th><th>Acción Realizada</th></tr></thead><tbody>`;
-  Object.values(DB.auditoria || {}).reverse().slice(0,40).forEach(log => {
-    html += `<tr><td>${log.fecha} — ${log.hora}</td><td>${log.usuario}</td><td><span class="badge badge-amber">${log.modulo}</span></td><td><b>${log.accion}</b> — ${log.idItem}</td></tr>`;
+  Object.values(DB.auditoria || {}).reverse().slice(0,15).forEach(log => {
+    html += `<tr><td>${log.fecha} — ${log.hora}</td><td>${log.usuario}</td><td><span class="badge badge-amber">${log.modulo}</span></td><td><b>${log.accion}</b></td></tr>`;
   });
   wrap.innerHTML = html + '</tbody></table>';
 }
 
-function openTasaModal() { document.getElementById('tasa-input').value = DB.tasa; openModal('modal-tasa'); }
-function saveTasa() {
+/* DASHBOARD ANALYTICS */
+let chartFlujoObj = null; let chartServicioObj = null;
+window.openTasaModal = function() { document.getElementById('tasa-input').value = DB.tasa; openModal('modal-tasa'); };
+window.saveTasa = function() {
   const v = parseFloat(document.getElementById('tasa-input').value);
   if(v > 0) { window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core'), { tasa: v }); closeModal('modal-tasa'); }
-}
+};
 
-/* REAL RESPONSIVE ANALYTICS ENGINE */
-let chartFlujoObj = null; let chartServicioObj = null;
 function renderDashboard() {
   let ingresosUSD = 0; let egresosUSD = 0;
-  
   Object.values(DB.proyectos).forEach(p => {
-    // Si la propuesta está firmada en Euros, se normaliza dinámicamente a USD para contabilidad centralizada
     let monto = p.financiero?.total_general || 0;
     if(p.financiero?.moneda_base === 'EUR') monto = monto * 1.08; 
     ingresosUSD += monto;
@@ -734,13 +699,13 @@ function renderDashboard() {
   `;
 
   const balanceDetalladoWrap = document.getElementById('dash-balance-detallado-table');
-  let balHtml = `<table><thead><tr><th>Fecha Valor</th><th>Tipo Flujo</th><th>Concepto / Identificador</th><th>Monto Conolidado USD</th><th>Monto Local VE</th></tr></thead><tbody>`;
+  let balHtml = `<table><thead><tr><th>Fecha Valor</th><th>Tipo Flujo</th><th>Concepto</th><th>Monto USD</th><th>Monto Bs</th></tr></thead><tbody>`;
   Object.values(DB.proyectos).forEach(p => {
     let u = p.financiero.moneda_base === 'EUR' ? p.financiero.total_general * 1.08 : p.financiero.total_general;
-    balHtml += `<tr><td>${p.metadata.fecha_creacion}</td><td><span class="badge badge-green">Ingreso</span></td><td>Proyecto: ${p.proyecto.linea_servicio} (${p.metadata.id_proyecto})</td><td style="color:var(--green); font-weight:700">+$${u.toFixed(2)}</td><td style="color:var(--text2)">Bs ${(u * DB.tasa).toFixed(2)}</td></tr>`;
+    balHtml += `<tr><td>${p.metadata.fecha_creacion}</td><td><span class="badge badge-green">Ingreso</span></td><td>Proyecto: ${p.metadata.id_proyecto}</td><td style="color:var(--green); font-weight:700">+$${u.toFixed(2)}</td><td>Bs ${(u * DB.tasa).toFixed(2)}</td></tr>`;
   });
   Object.values(DB.gastos).forEach(g => {
-    balHtml += `<tr><td>${g.fecha}</td><td><span class="badge badge-red">Egreso</span></td><td>Gasto: ${g.concepto}</td><td style="color:var(--red); font-weight:700">-$${g.monto.toFixed(2)}</td><td style="color:var(--text2)">Bs ${(g.monto * DB.tasa).toFixed(2)}</td></tr>`;
+    balHtml += `<tr><td>${g.fecha}</td><td><span class="badge badge-red">Egreso</span></td><td>Gasto: ${g.concepto}</td><td style="color:var(--red); font-weight:700">-$${g.monto.toFixed(2)}</td><td>Bs ${(g.monto * DB.tasa).toFixed(2)}</td></tr>`;
   });
   balanceDetalladoWrap.innerHTML = balHtml + '</tbody></table>';
 
@@ -761,6 +726,15 @@ function renderDashboard() {
   if(chartServicioObj) chartServicioObj.destroy();
   chartServicioObj = new Chart(ctxS, { type: 'doughnut', data: { labels: ['Pipeline Real'], datasets: [{ data: [ingresosUSD > 0 ? ingresosUSD : 0.001], backgroundColor: ['#6c63ff'] }] }, options: { maintainAspectRatio:false, plugins: { legend: { display: false } } } });
 }
+
+window.checkCustomPaymentSchema = function() {
+  const select = document.getElementById('proy-fin-esquema-select').value;
+  document.getElementById('proy-fin-esquema-custom').style.display = select === 'Personalizado' ? 'block' : 'none';
+};
+window.toggleComissionInputs = function() {
+  const val = document.getElementById('pers-aplica-com').value;
+  document.getElementById('row-comision-config').style.display = val === 'si' ? 'block' : 'none';
+};
 </script>
 </body>
 </html>
