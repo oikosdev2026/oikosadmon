@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Oikos Admon v5.0 — Ultimate Enterprise Console</title>
+<title>Oikos Admon v5.5 — Ultimate Responsive Studio</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, set, get, onValue, push, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, set, get, onValue, push, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   const firebaseConfig = {
@@ -29,7 +29,7 @@
 
   window._fbDB  = db; window._fbRef = ref; window._fbSet = set; window._fbGet = get;
   window._fbOnValue = onValue; window._fbAuth = auth; window._fbSignIn = signInWithEmailAndPassword;
-  window._fbSignOut = signOut; window._fbOnAuth = onAuthStateChanged; window._fbPush = push; window._fbUpdate = update;
+  window._fbSignOut = signOut; window._fbOnAuth = onAuthStateChanged; window._fbPush = push; window._fbUpdate = update; window._fbRemove = remove;
   window.dispatchEvent(new Event('firebase-ready'));
 </script>
 
@@ -41,138 +41,143 @@
   --border: #222235; --border2: #32324f;
   --text: #f1f1f6; --text2: #8e8ea8;
   --accent: #6c63ff; --accent2: #8b7fff; --accent3: rgba(108,99,255,0.15);
-  --green: #22c55e; --red: #ef4444; --amber: #f59e0b; --blue: #3b82f6; --purple: #a855f7;
-  --green-bg: rgba(34,197,94,.12); --red-bg: rgba(239,68,68,.12);
-  --amber-bg: rgba(245,158,11,.12); --shadow: rgba(0,0,0,0.7);
+  --green: #22c55e; --red: #ef4444; --amber: #f59e0b; --blue: #3b82f6;
+  --green-bg: rgba(34,197,94,.12); --red-bg: rgba(239,68,68,.12); --shadow: rgba(0,0,0,0.7);
 }
 
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
 #login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000}
 #login-screen.hidden{display:none}
-.login-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:40px;width:360px;box-shadow:0 12px 35px var(--shadow);text-align:center}
+.login-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:40px;width:100%;max-width:360px;box-shadow:0 12px 35px var(--shadow);text-align:center;margin:16px}
 
 #loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px}
 #loading-screen.hidden{display:none}
 .loader{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* NAVEGACIÓN TOTALIZADA IZQUERDA */
+/* DISEÑO RESPONSIVO NATIVO: MENÚ Y CONTENEDOR */
 #nav{position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--bg2);border-right:1px solid var(--border);z-index:100;overflow-y:auto;padding:24px 0;display:none}
 #nav.visible{display:block}
 .nav-logo{padding:0 24px 16px;font-size:16px;font-weight:700;color:var(--accent2);border-bottom:1px solid var(--border)}
 .nav-logo span{display:block;font-size:11px;color:var(--text2);font-weight:400;margin-top:4px}
 .nav-user{font-size:12px;color:var(--text2);padding:14px 24px;background:var(--bg3);margin:12px 0;display:flex;justify-content:space-between;align-items:center}
-#nav-user-email{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;font-weight:600}
+#nav-user-email{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px}
 .nav-section{padding:14px 24px 6px;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);font-weight:700}
-.nav-item{display:flex;align-items:center;gap:12px;padding:12px 24px;cursor:pointer;font-size:13px;color:var(--text2);font-weight:500;transition:all 0.2s}
+.nav-item{display:flex;align-items:center;gap:12px;padding:12px 24px;cursor:pointer;font-size:13px;color:var(--text2);font-weight:500}
 .nav-item:hover{background:var(--bg3);color:var(--text)}
 .nav-item.active{background:var(--accent3);color:var(--accent2);border-left:4px solid var(--accent);font-weight:600}
 
+/* RESPONSIVIDAD PARA EL MAIN */
 #main{margin-left:240px;padding:32px;min-height:100vh;display:none}
 #main.visible{display:block}
 .page{display:none}.page.active{display:block}
-.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;border-bottom:1px solid var(--border);padding-bottom:16px}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;border-bottom:1px solid var(--border);padding-bottom:16px;flex-wrap:wrap;gap:12px}
 .page-title{font-size:22px;font-weight:600}
+
+/* MEDIA QUERIES PARA PANTALLAS MÓVILES Y IPADS */
+@media(max-width:1024px){
+  #nav{width:100%;height:60px;bottom:auto;right:0;display:flex !important;padding:0;align-items:center;justify-content:space-between;border-right:none;border-bottom:1px solid var(--border)}
+  .nav-logo, .nav-user, .nav-section, .nav-item{padding:6px 12px;margin:0;border:none;background:transparent}
+  .nav-logo span, .nav-section, .nav-user{display:none !important}
+  .nav-menu-scroll{display:flex;overflow-x:auto;width:100%}
+  #main{margin-left:0;padding:80px 16px 24px 16px}
+}
 
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}
 .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px;box-shadow:0 4px 12px var(--shadow);position:relative}
-.stat-label{font-size:11px;color:var(--text2);text-transform:uppercase;margin-bottom:10px;font-weight:700;letter-spacing:0.5px}
+.stat-label{font-size:11px;color:var(--text2);text-transform:uppercase;margin-bottom:10px;font-weight:700}
 .stat-val{font-size:24px;font-weight:600;font-family:monospace}
-.stat-val.green{color:var(--green)}.stat-val.red{color:var(--red)}.stat-val.purple{color:var(--purple)}.stat-val.amber{color:var(--amber)}
+.stat-val.green{color:var(--green)}.stat-val.red{color:var(--red)}.stat-val.amber{color:var(--amber)}
 
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;margin-bottom:24px}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:20px;box-shadow:0 4px 15px var(--shadow)}
-.card-title{font-size:14px;font-weight:700;margin-bottom:18px;color:var(--text);text-transform:uppercase;letter-spacing:0.5px;border-left:3px solid var(--accent);padding-left:8px}
+.card-title{font-size:14px;font-weight:700;margin-bottom:18px;color:var(--text);text-transform:uppercase;border-left:3px solid var(--accent);padding-left:8px}
 
-.table-wrap{overflow-x:auto;border-radius:6px;border:1px solid var(--border);background:var(--bg2);margin-bottom:12px}
-table{width:100%;border-collapse:collapse;font-size:13px}
+.table-wrap{overflow-x:auto;border-radius:6px;border:1px solid var(--border);background:var(--bg2);margin-bottom:12px;width:100%}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:500px}
 th{background:var(--bg3);color:var(--text);font-weight:600;padding:14px;text-align:left;font-size:11px;text-transform:uppercase}
 td{padding:14px;border-top:1px solid var(--border);color:var(--text);line-height:1.4}
-tr:hover td{background:var(--bg3)}
 
-.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.15s}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.15s;white-space:nowrap}
 .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent2)}
-.btn-sm{padding:6px 12px;font-size:12px;border-radius:4px}
+.btn-sm{padding:6px 12px;font-size:12px}
 .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border)}.btn-ghost:hover{background:var(--bg3)}
 .btn-danger{background:var(--red-bg);color:var(--red);border:1px solid var(--red)}
 .btn-success{background:var(--green-bg);color:var(--green);border:1px solid var(--green)}
 
 .badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;text-transform:uppercase}
 .badge-green{background:var(--green-bg);color:var(--green)}.badge-red{background:var(--red-bg);color:var(--red)}.badge-amber{background:var(--amber-bg);color:var(--amber)}
+.chip{display:inline-flex;padding:4px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;font-size:11px;font-family:monospace}
 
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(3px);z-index:200;align-items:center;justify-content:center;padding:20px}
+/* COMPONENTE MODAL RESPONSIVO */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(3px);z-index:200;align-items:center;justify-content:center;padding:12px;overflow-y:auto}
 .modal-overlay.open{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:32px;width:640px;max-width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 45px rgba(0,0,0,0.8)}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:24px;width:100%;max-width:740px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 45px rgba(0,0,0,0.8)}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:10px;text-transform:uppercase}
 
-.form-group{margin-bottom:16px; display:flex; flex-direction:column; width:100%}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:4px}
-label{font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:700;text-transform:uppercase}
+.form-group{margin-bottom:16px; display:flex; flex-direction:column; width:100%; text-align:left}
+.form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:4px}
+label{font-size:11px;color:var(--text2);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
 input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:6px;font-size:13px;outline:none}
-.form-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:24px;padding-top:16px;border-top:1px solid var(--border)}
+.form-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:24px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap}
 
-.kanban-board{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.kanban-col{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;min-height:400px}
-.kanban-card{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:10px}
-
-.pdf-preview-box { background: #fff !important; color: #1a1a1a !important; padding: 50px; width: 210mm; min-height: 297mm; margin: 0 auto; }
-.pdf-header { display: flex; justify-content: space-between; border-bottom: 2px solid #6c63ff; padding-bottom: 15px; margin-bottom: 25px; }
-.pdf-table { width: 100%; margin-bottom: 25px; border-collapse: collapse; }
-.pdf-table th { background: #1a1a1a !important; color: #fff !important; padding: 10px; text-transform: uppercase; font-size: 11px }
-.pdf-table td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0 !important; color: #222 !important; font-size: 12px; }
+.pdf-preview-box { background: #fff !important; color: #1a1a1a !important; padding: 40px; width: 100%; max-width: 210mm; min-height: 297mm; margin: 0 auto; font-family: sans-serif; }
+.pdf-header { display: flex; justify-content: space-between; border-bottom: 2px solid #6c63ff; padding-bottom: 12px; margin-bottom: 20px; }
+.pdf-table { width: 100%; margin-bottom: 20px; border-collapse: collapse; }
+.pdf-table th { background: #1a1a1a !important; color: #fff !important; padding: 10px; font-size: 11px }
+.pdf-table td { padding: 10px; border-bottom: 1px solid #e2e8f0 !important; color: #222 !important; font-size: 12px; }
 </style>
 </head>
 <body>
 
-<!-- ACCESO SECURE -->
+<!-- COMPONENTE ACCESO -->
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">🎬 Oikos Admon Pro</div>
-    <div style="font-size:12px; color:var(--text2); margin-bottom:24px; text-transform:uppercase">Console Enterprise Suite</div>
+    <div style="font-size:12px; color:var(--text2); margin-bottom:24px; text-transform:uppercase">Studio Console v5.5</div>
     <div class="login-err" id="login-err"></div>
-    <div class="form-group"><label>Email Corporativo</label><input type="email" id="login-email" placeholder="tu-correo@oikos.media"></div>
+    <div class="form-group"><label>Email Corporativo</label><input type="email" id="login-email" placeholder="usuario@oikos.media"></div>
     <div class="form-group"><label>Contraseña</label><input type="password" id="login-pass" placeholder="••••••••"></div>
-    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doLogin()">Autenticar</button>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doLogin()">Iniciar Sistema</button>
   </div>
 </div>
 
-<div id="loading-screen" class="hidden">
-  <div class="loader"></div>
-  <div class="load-text">Estableciendo puente seguro de datos v5.0...</div>
-</div>
+<div id="loading-screen" class="hidden"><div class="loader"></div><div class="load-text">Estructurando Célula Madre Operativa...</div></div>
 
-<!-- MENÚ COMPLETO RECONECTADO -->
+<!-- BARRA DE NAVEGACIÓN -->
 <nav id="nav">
-  <div class="nav-logo">Oikos Admon Pro<span>Studio Administration v5.0</span></div>
+  <div class="nav-logo">Oikos Admon Pro<span>Studio Administration</span></div>
   <div class="nav-user"><span id="nav-user-email">...</span><button class="btn btn-ghost btn-sm" onclick="doLogout()">⏻</button></div>
-
-  <div class="nav-section">Módulos Core</div>
-  <div class="nav-item active" onclick="goto('dashboard')">Dashboard Consolidado</div>
-  <div class="nav-item" onclick="goto('proyectos_cotizados')">Célula Madre (Proyectos)</div>
-  <div class="nav-item" onclick="goto('clientes')">Clientes (CRM)</div>
-  <div class="nav-item" onclick="goto('ordenes')">Órdenes de Servicio</div>
-  <div class="nav-item" onclick="goto('kanban')">Línea Kanban</div>
-  <div class="nav-item" onclick="goto('gastos')">Gastos Operativos &amp; Proy</div>
-  <div class="nav-item" onclick="goto('personal')">Equipo Humano &amp; Comisiones</div>
-  <div class="nav-item" onclick="goto('auditoria')">Historial de Cambios</div>
+  <div class="nav-menu-scroll">
+    <div class="nav-item active" onclick="goto('dashboard')">Dashboard</div>
+    <div class="nav-item" onclick="goto('proyectos_cotizados')">Célula Madre</div>
+    <div class="nav-item" onclick="goto('servicios')">Líneas de Servicio</div>
+    <div class="nav-item" onclick="goto('clientes')">Clientes (CRM)</div>
+    <div class="nav-item" onclick="goto('ordenes')">Órdenes</div>
+    <div class="nav-item" onclick="goto('gastos')">Gastos &amp; Costos</div>
+    <div class="nav-item" onclick="goto('personal')">Equipo &amp; Comisiones</div>
+    <div class="nav-item" onclick="goto('auditoria')">Logs</div>
+  </div>
 </nav>
 
 <main id="main">
 
-  <!-- DASHBOARD -->
+  <!-- DASHBOARD OPERATIVO -->
   <div id="page-dashboard" class="page active">
-    <div class="page-header"><div class="page-title">Dashboard Operativo Consolidado</div></div>
+    <div class="page-header">
+      <div class="page-title">Dashboard Operativo Consolidado</div>
+      <!-- BOTÓN DE ACCESO DIRECTO SOLICITADO -->
+      <button class="btn btn-primary" onclick="prepareNewProyecto()">+ Crear Proyecto Master</button>
+    </div>
     <div class="stats-grid" id="dash-stats"></div>
     
     <div class="grid-2">
       <div class="card"><div class="card-title">Balance Monetario Real (USD)</div><div style="position:relative;height:220px"><canvas id="chart-flujo"></canvas></div></div>
-      <div class="card"><div class="card-title">Pipeline Proyectos Activos</div><div style="position:relative;height:220px"><canvas id="chart-servicios-rent"></canvas></div></div>
+      <div class="card"><div class="card-title">Pipeline de Producción</div><div style="position:relative;height:220px"><canvas id="chart-servicios-rent"></canvas></div></div>
     </div>
 
-    <!-- BALANCE DETALLADO DE INGRESOS Y EGRESOS -->
-    <div class="card">
-      <div class="card-title">Balance y Libro de Caja Detallado</div>
-      <div class="table-wrap" id="dash-balance-detallado-table"></div>
-    </div>
+    <div class="card"><div class="card-title">Balance y Libro de Caja Detallado (Consolidado USD)</div><div class="table-wrap" id="dash-balance-detallado-table"></div></div>
 
     <div class="grid-2">
       <div class="card"><div class="card-title">Cuentas por Pagar Inmediatas</div><div class="table-wrap" id="dash-cxp-table"></div></div>
@@ -186,15 +191,21 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
     </div>
   </div>
 
+  <!-- SECCIÓN GESTIÓN LINEAS DE SERVICIO REALES -->
+  <div id="page-servicios" class="page">
+    <div class="page-header"><div class="page-title">Configuración de Líneas de Servicio</div><button class="btn btn-primary" onclick="openNewServicioModal()">+ Agregar Línea de Servicio</button></div>
+    <div class="card"><div class="table-wrap" id="servicios-table-wrap"></div></div>
+  </div>
+
   <!-- CELULA MADRE -->
   <div id="page-proyectos_cotizados" class="page">
     <div class="page-header"><div class="page-title">Célula Madre de Proyectos</div><button class="btn btn-primary" onclick="prepareNewProyecto()">+ Crear Proyecto Maestro</button></div>
     <div class="card"><div class="table-wrap" id="proyectos-table-wrap"></div></div>
   </div>
 
-  <!-- CRM CLIENTES -->
+  <!-- CRM -->
   <div id="page-clientes" class="page">
-    <div class="page-header"><div><div class="page-title">CRM de Clientes</div></div><button class="btn btn-primary" onclick="prepareNewCliente()">+ Nuevo Cliente</button></div>
+    <div class="page-header"><div class="page-title">CRM de Clientes</div><button class="btn btn-primary" onclick="prepareNewCliente()">+ Nuevo Cliente</button></div>
     <div id="clientes-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px"></div>
   </div>
 
@@ -204,54 +215,53 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
     <div id="os-list"></div>
   </div>
 
-  <!-- KANBAN -->
-  <div id="page-kanban" class="page">
-    <div class="page-header"><div><div class="page-title">Tablero Kanban</div></div></div>
-    <div class="kanban-board" id="kanban-board"></div>
-  </div>
-
   <!-- GASTOS -->
   <div id="page-gastos" class="page">
-    <div class="page-header"><div><div class="page-title">Flujo de Gastos &amp; Costos de Proyecto</div></div><button class="btn btn-primary" onclick="prepareNewGasto()">+ Registrar Gasto / Costo</button></div>
+    <div class="page-header"><div><div class="page-title">Estructura de Gastos y Costos</div></div><button class="btn btn-primary" onclick="prepareNewGasto()">+ Registrar Gasto / Costo</button></div>
     <div class="card"><div class="table-wrap" id="gastos-table-wrap"></div></div>
   </div>
 
   <!-- PERSONAL -->
   <div id="page-personal" class="page">
-    <div class="page-header"><div><div class="page-title">Equipo Humano &amp; Comisiones Liquidadas</div></div><button class="btn btn-primary" onclick="prepareNewPersonal()">+ Alta Integrante</button></div>
+    <div class="page-header"><div><div class="page-title">Equipo Humano &amp; Comisiones</div></div><button class="btn btn-primary" onclick="prepareNewPersonal()">+ Alta Integrante</button></div>
     <div class="card"><div class="card-title">Cálculo Automático de Comisiones por Proyecto</div><div class="table-wrap" id="comisiones-auto-table-wrap"></div></div>
     <div class="card" style="margin-top:20px"><div class="card-title">Estructura del Equipo</div><div class="table-wrap" id="personal-table-wrap"></div></div>
   </div>
 
-  <!-- LOGS DE AUDITORIA COMPLETO -->
+  <!-- AUDITORIA -->
   <div id="page-auditoria" class="page">
-    <div class="page-header"><div class="page-title">Historial de Cambios y Acciones de Plataforma</div></div>
+    <div class="page-header"><div class="page-title">Logs de Auditoría</div></div>
     <div class="card"><div class="table-wrap" id="auditoria-table-wrap"></div></div>
   </div>
 </main>
 
-<!-- MODAL CAMBIO TASA -->
-<div class="modal-overlay" id="modal-tasa"><div class="modal" style="width:340px">
-  <h3>Actualizar Tasa de Cambio</h3>
-  <div class="form-group"><label>Valor 1 USD en Bs</label><input type="number" id="tasa-input" step="0.01"></div>
-  <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-tasa')">Cerrar</button><button class="btn btn-primary" onclick="saveTasa()">Actualizar</button></div>
+<!-- MODAL LÍNEA DE SERVICIO -->
+<div class="modal-overlay" id="modal-servicio-form"><div class="modal" style="width:400px">
+  <h3>Línea de Servicio</h3>
+  <input type="hidden" id="ser-id">
+  <div class="form-group"><label>Nombre del Servicio / Unidad</label><input type="text" id="ser-nombre" placeholder="Ej: Producción Audiovisual"></div>
+  <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-servicio-form')">Cancelar</button><button class="btn btn-primary" onclick="saveServicioAction()">Guardar Línea</button></div>
 </div></div>
 
-<!-- RESTO DE MODALS (PRESERVA TODAS LAS MEJORAS ESTÉTICAS VERTICALES) -->
-<div class="modal-overlay" id="modal-proyecto"><div class="modal" style="width:760px">
+<!-- MODAL CÉLULA MADRE CENTRAL -->
+<div class="modal-overlay" id="modal-proyecto"><div class="modal" style="width:780px">
   <h3>Estructura "Célula Madre" del Proyecto</h3>
   <input type="hidden" id="proy-id">
+  
   <div class="form-row">
-    <div class="form-group"><label>ID Proyecto</label><input type="text" id="proy-meta-id"></div>
+    <div class="form-group"><label>ID Código Proyecto</label><input type="text" id="proy-meta-id"></div>
     <div class="form-group"><label>Asesor Enlace</label><input type="text" id="proy-meta-asesor"></div>
   </div>
   <div class="form-row">
-    <div class="form-group"><label>Cliente</label><select id="proy-cli-select"></select><button class="btn btn-success btn-sm" style="margin-top:6px;width:100%;justify-content:center" onclick="openFastClienteModal()">+ Registrar Express Cliente</button></div>
-    <div class="form-group"><label>Contacto</label><input type="text" id="proy-cli-contacto"></div>
+    <div class="form-group"><label>Cliente Titular</label><select id="proy-cli-select"></select><button class="btn btn-success btn-sm" style="margin-top:6px;width:100%;justify-content:center" onclick="openFastClienteModal()">+ Registrar Express Cliente</button></div>
+    <!-- EXPLICITACIÓN DEL NÚMERO DE CONTACTO SOLICITADO -->
+    <div class="form-group"><label>Nombre del Contacto Directo del Cliente</label><input type="text" id="proy-cli-contacto" placeholder="Persona encargada de validar entregables"></div>
   </div>
-  <h4 style="margin:16px 0 8px; color:var(--accent); font-size:13px; text-transform:uppercase">Especificaciones de Pauta</h4>
+
+  <h4 style="margin:16px 0 8px; color:var(--accent); font-size:13px; text-transform:uppercase">Especificaciones Técnicas</h4>
   <div class="form-row">
-    <div class="form-group"><label>Línea de Servicio / Concepto</label><input type="text" id="proy-tech-linea"></div>
+    <!-- DESPLEGABLE DINÁMICO DE LÍNEAS DE SERVICIO REALES -->
+    <div class="form-group"><label>Línea de Servicio Real</label><select id="proy-tech-linea-select"></select></div>
     <div class="form-group"><label>Tiempo de Pauta / Duración</label><input type="text" id="proy-tech-pauta"></div>
   </div>
   <div class="form-row">
@@ -263,27 +273,34 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
     <div class="form-group"><label>Locación / Lugar</label><input type="text" id="proy-tech-lugar"></div>
   </div>
   <div class="form-group"><label>Alcance General</label><textarea id="proy-tech-alcance" style="height:60px"></textarea></div>
+
+  <h4 style="margin:16px 0 8px; color:var(--accent); font-size:13px; text-transform:uppercase">Áreas de Servicio y Entregables</h4>
   <div id="items-builder-container" style="background:var(--bg3); padding:12px; border-radius:6px; margin-bottom:10px"></div>
   <button class="btn btn-ghost btn-sm" onclick="addTableRowItem()">+ Inyectar Fila de Ítem</button>
-  <div class="form-row" style="margin-top:14px">
-    <div class="form-group"><label>Moneda Base</label><select id="proy-fin-moneda"><option value="USD">USD ($)</option><option value="BS">Bolívares (Bs)</option></select></div>
-    <div class="form-group"><label>Esquema de Pago</label><input type="text" id="proy-fin-esquema"></div>
+
+  <h4 style="margin:16px 0 8px; color:var(--accent); font-size:13px; text-transform:uppercase">Estructura Financiera de la Propuesta</h4>
+  <div class="form-row">
+    <!-- INCLUSIÓN DE LA OPCIÓN DE EURO EN MONEDA BASE -->
+    <div class="form-group"><label>Moneda Base (Cotización)</label><select id="proy-fin-moneda"><option value="USD">USD ($)</option><option value="EUR">Euro (€)</option><option value="BS">Bolívares (Bs)</option></select></div>
+    <!-- SELECCIÓN ESTRUCTURADA DE ESQUEMAS DE PAGO -->
+    <div class="form-group"><label>Esquema de Pago Comercial</label><select id="proy-fin-esquema-select" onchange="checkCustomPaymentSchema()"><option value="70 - 30">70% Anticipo / 30% Finiquito</option><option value="100%">100% Anticipado</option><option value="Personalizado">Esquema Personalizado...</option></select><input type="text" id="proy-fin-esquema-custom" placeholder="Especificar hito" style="display:none; margin-top:6px"></div>
   </div>
   <div class="form-row">
-    <div class="form-group"><label>Anticipo ($)</label><input type="number" id="proy-fin-anticipo" value="0" step="0.01"></div>
-    <div class="form-group"><label>Finiquito ($)</label><input type="number" id="proy-fin-finiquito" value="0" step="0.01"></div>
+    <div class="form-group"><label>Anticipo Monto</label><input type="number" id="proy-fin-anticipo" value="0" step="0.01"></div>
+    <div class="form-group"><label>Finiquito Monto</label><input type="number" id="proy-fin-finiquito" value="0" step="0.01"></div>
   </div>
-  <div class="form-group"><label>Métodos Autorizados</label><input type="text" id="proy-fin-metodos" value="Zelle, Efectivo, Transferencia España"></div>
+  <div class="form-group"><label>Métodos Autorizados</label><input type="text" id="proy-fin-metodos" value="Zelle, Efectivo, Transferencia España, SEPA"></div>
   <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-proyecto')">Cancelar</button><button class="btn btn-primary" onclick="saveProyectoMasterAction()">Guardar Célula Madre</button></div>
 </div></div>
 
-<div class="modal-overlay" id="modal-fast-cliente" style="z-index:300"><div class="modal" style="width:380px">
-  <h3>+ Registro Express de Cliente</h3>
-  <div class="form-group"><label>Nombre Empresa</label><input type="text" id="fast-cli-nombre"></div>
-  <div class="form-group"><label>RIF / Tax ID</label><input type="text" id="fast-cli-rif"></div>
-  <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-fast-cliente')">Cerrar</button><button class="btn btn-primary" onclick="saveFastClienteAction()">Inyectar</button></div>
+<!-- MODAL CAMBIO TASA -->
+<div class="modal-overlay" id="modal-tasa"><div class="modal" style="width:340px">
+  <h3>Actualizar Tasa de Cambio</h3>
+  <div class="form-group"><label>Valor 1 USD en Bs</label><input type="number" id="tasa-input" step="0.01"></div>
+  <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-tasa')">Cerrar</button><button class="btn btn-primary" onclick="saveTasa()">Actualizar</button></div>
 </div></div>
 
+<!-- MODAL CLIENTE CRM -->
 <div class="modal-overlay" id="modal-cliente"><div class="modal" style="width:420px"><h3>Ficha Cliente CRM</h3><input type="hidden" id="cli-id">
   <div class="form-group"><label>Razón Social / Empresa</label><input type="text" id="cli-nombre"></div>
   <div class="form-group"><label>RIF / Identificación Fiscal</label><input type="text" id="cli-rif"></div>
@@ -291,15 +308,25 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
   <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-cliente')">Cancelar</button><button class="btn btn-primary" onclick="saveClienteAction()">Guardar Cliente</button></div>
 </div></div>
 
+<!-- MODAL EXPRESS CLIENTE -->
+<div class="modal-overlay" id="modal-fast-cliente" style="z-index:300"><div class="modal" style="width:380px">
+  <h3>+ Registro Express de Cliente</h3>
+  <div class="form-group"><label>Nombre Empresa</label><input type="text" id="fast-cli-nombre"></div>
+  <div class="form-group"><label>RIF / Tax ID</label><input type="text" id="fast-cli-rif"></div>
+  <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-fast-cliente')">Cerrar</button><button class="btn btn-primary" onclick="saveFastClienteAction()">Inyectar</button></div>
+</div></div>
+
+<!-- ORDEN DE SERVICIO -->
 <div class="modal-overlay" id="modal-os"><div class="modal" style="width:460px"><h3>Orden de Servicio Técnico</h3><input type="hidden" id="os-id">
   <div class="form-group"><label>Cliente Titular</label><select id="os-cliente"></select></div>
-  <div class="form-group"><label>Línea de Servicio Real</label><select id="os-servicio"><option value="Producción Audiovisual">Producción Audiovisual</option><option value="Broadcast / Streaming">Broadcast / Streaming</option><option value="Alquiler de equipos">Alquiler de equipos</option><option value="Servicios Profesionales">Servicios Profesionales</option></select></div>
+  <div class="form-group"><label>Línea de Servicio Real</label><select id="os-servicio-select"></select></div>
   <div class="form-group"><label>Especialista Responsable</label><select id="os-responsable"></select></div>
-  <div class="form-group"><label>Descripción Logística Operativa</label><textarea id="os-desc" style="height:65px"></textarea></div>
-  <div class="form-row"><div class="form-group"><label>Monto Cotizado (USD)</label><input type="number" id="os-monto" step="0.01"></div><div class="form-group"><label>Estado del Ticket</label><select id="os-estado"><option value="pendiente">Pendiente</option><option value="en_proceso">En Proceso</option><option value="completado">Completado</option><option value="cancelado">Cancelado</option></select></div></div>
+  <div class="form-group"><label>Descripción Logística</label><textarea id="os-desc" style="height:65px"></textarea></div>
+  <div class="form-row"><div class="form-group"><label>Monto Cotizado (USD)</label><input type="number" id="os-monto" step="0.01"></div><div class="form-group"><label>Estado</label><select id="os-estado"><option value="pendiente">Pendiente</option><option value="en_proceso">En Proceso</option><option value="completado">Completado</option><option value="cancelado">Cancelado</option></select></div></div>
   <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-os')">Cancelar</button><button class="btn btn-primary" onclick="saveOSAction()">Guardar OS</button></div>
 </div></div>
 
+<!-- GASTOS -->
 <div class="modal-overlay" id="modal-gasto"><div class="modal" style="width:460px"><h3>Gasto / Costo de Proyecto</h3><input type="hidden" id="gasto-id">
   <div class="form-group"><label>Concepto del Gasto</label><input type="text" id="gasto-concepto"></div>
   <div class="form-row"><div class="form-group"><label>Monto Neto (USD)</label><input type="number" id="gasto-monto" step="0.01"></div><div class="form-group"><label>Fecha Operación</label><input type="date" id="gasto-fecha"></div></div>
@@ -310,6 +337,7 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
   <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-gasto')">Cancelar</button><button class="btn btn-primary" onclick="saveGastoAction()">Procesar Gasto</button></div>
 </div></div>
 
+<!-- PERSONAL -->
 <div class="modal-overlay" id="modal-personal"><div class="modal" style="width:450px"><h3>Ficha Integrante Equipo</h3><input type="hidden" id="pers-id">
   <div class="form-group"><label>Nombre Completo</label><input type="text" id="pers-nombre"></div>
   <div class="form-group"><label>Cargo / Especialidad</label><input type="text" id="pers-cargo"></div>
@@ -322,9 +350,10 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
   <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal('modal-personal')">Cancelar</button><button class="btn btn-primary" onclick="savePersonalAction()">Guardar Ficha</button></div>
 </div></div>
 
+<!-- LIENZO PDF EDITORIAL -->
 <div class="modal-overlay" id="modal-documento-output"><div class="modal" style="width:880px; background:var(--bg3)">
   <h3>Generador Editorial de Documentos</h3>
-  <div style="display:flex; gap:8px; margin-bottom:14px">
+  <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap">
     <button class="btn btn-ghost btn-sm" onclick="triggerTransformacionDoc('PROPUESTA')">Propuesta de Servicios</button>
     <button class="btn btn-ghost btn-sm" onclick="triggerTransformacionDoc('OS_INTERNA')">Orden de Servicio Interna</button>
     <button class="btn btn-ghost btn-sm" onclick="triggerTransformacionDoc('PREFACTURA')">Prefactura Interna</button>
@@ -335,7 +364,7 @@ input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bo
 </div></div>
 
 <script>
-let DB = { tasa: 45, clientes: {}, proyectos: {}, ordenes: {}, gastos: {}, personal: {}, auditoria: {} };
+let DB = { tasa: 45, clientes: {}, proyectos: {}, ordenes: {}, gastos: {}, personal: {}, auditoria: {}, servicios: {} };
 let currentUser = null; let activeProjectKeyForDoc = null;
 
 const OIKOS_SVG_LOGO = `<svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M50 5L15 40H35V95H65V40H85L50 5Z" fill="#6c63ff"/><circle cx="50" cy="55" r="12" fill="#ffffff"/></svg>`;
@@ -360,7 +389,8 @@ function initRealtimeSync() {
       const s = snap.val();
       DB = {
         tasa: s.tasa || 45, clientes: s.clientes || {}, proyectos: s.proyectos || {},
-        ordenes: s.ordenes || {}, gastos: s.gastos || {}, personal: s.personal || {}, auditoria: s.auditoria || {}
+        ordenes: s.ordenes || {}, gastos: s.gastos || {}, personal: s.personal || {}, auditoria: s.auditoria || {},
+        servicios: s.servicios || {}
       };
     }
     document.getElementById('loading-screen').classList.add('hidden');
@@ -369,7 +399,6 @@ function initRealtimeSync() {
   });
 }
 
-// TRAIL DE AUDITORÍA CENTRALIZADO
 function logSystemAction(accion, modulo, idItem, detalles) {
   const nRef = window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/auditoria'));
   window._fbSet(nRef, {
@@ -382,6 +411,7 @@ function logSystemAction(accion, modulo, idItem, detalles) {
 function syncSelectDropdowns() {
   const proyCli = document.getElementById('proy-cli-select'); const osCli = document.getElementById('os-cliente');
   const osResp = document.getElementById('os-responsable'); const gastoProy = document.getElementById('gasto-proyecto-vinculo');
+  const proyServ = document.getElementById('proy-tech-linea-select'); const osServ = document.getElementById('os-servicio-select');
 
   let cliHtml = '<option value="">Seleccionar Cliente...</option>';
   Object.keys(DB.clientes).forEach(k => { if(DB.clientes[k].estado !== 'inactivo') cliHtml += `<option value="${k}">${DB.clientes[k].nombre}</option>`; });
@@ -394,6 +424,17 @@ function syncSelectDropdowns() {
   let gProyHtml = '<option value="">Gasto Estructural Fijo / General</option>';
   Object.keys(DB.proyectos).forEach(k => { gProyHtml += `<option value="${DB.proyectos[k].metadata.id_proyecto}">${DB.proyectos[k].metadata.id_proyecto} - ${DB.proyectos[k].proyecto.linea_servicio}</option>`; });
   if(gastoProy) gastoProy.innerHTML = gProyHtml;
+
+  // Inyección de servicios de forma dinámica
+  let servHtml = '';
+  Object.values(DB.servicios).forEach(s => { servHtml += `<option value="${s.nombre}">${s.nombre}</option>`; });
+  if(!Object.keys(DB.servicios).length) { servHtml = '<option value="Producción Audiovisual">Producción Audiovisual</option><option value="Broadcast / Streaming">Broadcast / Streaming</option>'; }
+  if(proyServ) proyServ.innerHTML = servHtml; if(osServ) osServ.innerHTML = servHtml;
+}
+
+function checkCustomPaymentSchema() {
+  const select = document.getElementById('proy-fin-esquema-select').value;
+  document.getElementById('proy-fin-esquema-custom').style.display = select === 'Personalizado' ? 'block' : 'none';
 }
 
 function toggleComissionInputs() {
@@ -414,7 +455,7 @@ function goto(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(i => {
+  document.querySelectorAll('.nav-menu-scroll .nav-item').forEach(i => {
     if(i.getAttribute('onclick') && i.getAttribute('onclick').includes(`'${page}'`)) i.classList.add('active');
   });
   currentPage = page; renderPage(page);
@@ -423,34 +464,42 @@ function renderCurrentPage() { renderPage(currentPage); }
 function renderPage(page) {
   if(page === 'dashboard') renderDashboard(); if(page === 'proyectos_cotizados') renderProyectosMaster();
   if(page === 'clientes') renderClientes(); if(page === 'ordenes') renderOrdenes();
-  if(page === 'kanban') renderKanban(); if(page === 'gastos') renderGastos();
-  if(page === 'personal') renderPersonal(); if(page === 'auditoria') renderAuditoria();
+  if(page === 'gastos') renderGastos(); if(page === 'personal') renderPersonal();
+  if(page === 'auditoria') renderAuditoria(); if(page === 'servicios') renderServicios();
 }
 
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+/* CRUD LÍNEAS DE SERVICIO REALES */
+function openNewServicioModal() {
+  document.getElementById('ser-id').value = ''; document.getElementById('ser-nombre').value = ''; openModal('modal-servicio-form');
+}
+function saveServicioAction() {
+  const id = document.getElementById('ser-id').value; const nombre = document.getElementById('ser-nombre').value.trim();
+  if(!nombre) return;
+  if(id) { window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core/servicios/' + id), { nombre }); }
+  else { window._fbSet(window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/servicios')), { nombre }); }
+  closeModal('modal-servicio-form');
+}
+function deleteServicio(id) { if(confirm('¿Eliminar esta línea de servicio?')) window._fbRemove(window._fbRef(window._fbDB, 'oikos_stable_core/servicios/' + id)); }
+function renderServicios() {
+  const wrap = document.getElementById('servicios-table-wrap'); wrap.innerHTML = '';
+  let html = `<table><thead><tr><th>Nombre de la Unidad de Servicio</th><th>Acciones</th></tr></thead><tbody>`;
+  Object.keys(DB.servicios).forEach(k => {
+    html += `<tr><td><b>${DB.servicios[k].nombre}</b></td><td><button class="btn btn-danger btn-sm" onclick="deleteServicio('${k}')">Eliminar</button></td></tr>`;
+  });
+  wrap.innerHTML = html + '</tbody></table>';
+}
 
 /* CRM */
 function prepareNewCliente() {
   document.getElementById('cli-id').value = ''; document.getElementById('cli-nombre').value = '';
   document.getElementById('cli-rif').value = ''; document.getElementById('cli-estado').value = 'activo'; openModal('modal-cliente');
 }
-function editCliente(key) {
-  const c = DB.clientes[key]; document.getElementById('cli-id').value = key;
-  document.getElementById('cli-nombre').value = c.nombre; document.getElementById('cli-rif').value = c.rif || '';
-  document.getElementById('cli-estado').value = c.estado || 'activo'; openModal('modal-cliente');
-}
 function saveClienteAction() {
   const id = document.getElementById('cli-id').value;
   const obj = { nombre: document.getElementById('cli-nombre').value.trim(), rif: document.getElementById('cli-rif').value, estado: document.getElementById('cli-estado').value };
   if(!obj.nombre) return;
-  if(id) {
-    window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core/clientes/' + id), obj);
-    logSystemAction('Modificación Cliente', 'CRM', obj.nombre, obj);
-  } else {
-    window._fbSet(window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/clientes')), obj);
-    logSystemAction('Alta Cliente', 'CRM', obj.nombre, obj);
-  }
+  if(id) { window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core/clientes/' + id), obj); }
+  else { window._fbSet(window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/clientes')), obj); }
   closeModal('modal-cliente');
 }
 function saveFastClienteAction() {
@@ -464,17 +513,17 @@ function renderClientes() {
   const grid = document.getElementById('clientes-grid'); grid.innerHTML = '';
   Object.keys(DB.clientes).forEach(k => {
     const c = DB.clientes[k];
-    grid.innerHTML += `<div class="card" onclick="editCliente('${k}')" style="cursor:pointer; text-align:left"><b>${c.nombre}</b><br><span style="font-size:12px; color:var(--text2)">RIF: ${c.rif || '—'}</span><br><span class="badge ${c.estado === 'inactivo' ? 'badge-red' : 'badge-green'}" style="margin-top:8px">${c.estado}</span></div>`;
+    grid.innerHTML += `<div class="card"><b>${c.nombre}</b><br><span style="font-size:12px; color:var(--text2)">RIF: ${c.rif || '—'}</span><br><span class="badge ${c.estado === 'inactivo' ? 'badge-red' : 'badge-green'}" style="margin-top:8px">${c.estado}</span></div>`;
   });
 }
 
-/* ÍTEMS CELULA MADRE */
+/* ÍTEMS */
 function addTableRowItem(cat='', con='', cant=1, uni='Pauta', pre=0) {
   const container = document.getElementById('items-builder-container');
   const div = document.createElement('div'); div.className = 'item-builder-row'; div.style.display = 'grid'; div.style.gridTemplateColumns = '1.2fr 2fr 0.8fr 1fr 1fr auto'; div.style.gap = '8px'; div.style.marginBottom = '8px';
   div.innerHTML = `
-    <input type="text" class="item-cat" value="${cat}" placeholder="Categoría">
-    <input type="text" class="item-con" value="${con}" placeholder="Concepto/Entregable">
+    <input type="text" class="item-cat" value="${cat}" placeholder="Área">
+    <input type="text" class="item-con" value="${con}" placeholder="Concepto Entregable">
     <input type="number" class="item-cant" value="${cant}">
     <input type="text" class="item-uni" value="${uni}">
     <input type="number" class="item-pre" value="${pre}" step="0.01">
@@ -483,16 +532,15 @@ function addTableRowItem(cat='', con='', cant=1, uni='Pauta', pre=0) {
   container.appendChild(div);
 }
 
-/* PROYECTOS CORE */
+/* MASTER PROYECTOS */
 function prepareNewProyecto() {
   document.getElementById('proy-id').value = ''; document.getElementById('proy-meta-id').value = 'PROY-2026-' + Math.floor(1000 + Math.random() * 9000);
   document.getElementById('proy-meta-asesor').value = ''; document.getElementById('proy-cli-select').value = '';
-  document.getElementById('proy-cli-contacto').value = ''; document.getElementById('proy-tech-linea').value = '';
-  document.getElementById('proy-tech-pauta').value = ''; document.getElementById('proy-tech-jornadas').value = 1;
-  document.getElementById('proy-tech-fecha').value = today(); document.getElementById('proy-tech-horario').value = '';
-  document.getElementById('proy-tech-lugar').value = ''; document.getElementById('proy-tech-alcance').value = '';
-  document.getElementById('proy-fin-anticipo').value = 0; document.getElementById('proy-fin-finiquito').value = 0;
-  document.getElementById('items-builder-container').innerHTML = '';
+  document.getElementById('proy-cli-contacto').value = ''; document.getElementById('proy-tech-pauta').value = '';
+  document.getElementById('proy-tech-jornadas').value = 1; document.getElementById('proy-tech-fecha').value = today();
+  document.getElementById('proy-tech-horario').value = ''; document.getElementById('proy-tech-lugar').value = '';
+  document.getElementById('proy-tech-alcance').value = ''; document.getElementById('proy-fin-anticipo').value = 0;
+  document.getElementById('proy-fin-finiquito').value = 0; document.getElementById('items-builder-container').innerHTML = '';
   addTableRowItem('Producción', 'Servicio Técnico Base', 1, 'Proyecto', 1500); openModal('modal-proyecto');
 }
 function saveProyectoMasterAction() {
@@ -504,20 +552,18 @@ function saveProyectoMasterAction() {
     sub += (cant * pre);
     itemsArray.push({ categoria: row.querySelector('.item-cat').value, concepto: row.querySelector('.item-con').value, cantidad: cant, unidad: row.querySelector('.item-uni').value, precio_unitario: pre, total: (cant * pre) });
   });
+  const selectEsquema = document.getElementById('proy-fin-esquema-select').value;
+  const finalEsquema = selectEsquema === 'Personalizado' ? document.getElementById('proy-fin-esquema-custom').value : selectEsquema;
+  
   const obj = {
     metadata: { id_proyecto: document.getElementById('proy-meta-id').value, fecha_creacion: today(), asesor: document.getElementById('proy-meta-asesor').value, version: 1 },
     cliente: { nombre_empresa: DB.clientes[cliKey].nombre, rif_id: DB.clientes[cliKey].rif || '—', contacto: document.getElementById('proy-cli-contacto').value, telefono: '—' },
-    proyecto: { linea_servicio: document.getElementById('proy-tech-linea').value, alcance_general: document.getElementById('proy-tech-alcance').value, tiempo_pauta: document.getElementById('proy-tech-pauta').value, jornadas_totales: parseInt(document.getElementById('proy-tech-jornadas').value), fecha_evento: document.getElementById('proy-tech-fecha').value, horario: document.getElementById('proy-tech-horario').value, lugar: document.getElementById('proy-tech-lugar').value },
+    proyecto: { linea_servicio: document.getElementById('proy-tech-linea-select').value, alcance_general: document.getElementById('proy-tech-alcance').value, tiempo_pauta: document.getElementById('proy-tech-pauta').value, jornadas_totales: parseInt(document.getElementById('proy-tech-jornadas').value), fecha_evento: document.getElementById('proy-tech-fecha').value, horario: document.getElementById('proy-tech-horario').value, lugar: document.getElementById('proy-tech-lugar').value },
     items: itemsArray,
-    financiero: { moneda_base: document.getElementById('proy-fin-moneda').value, subtotal: sub, impuestos: 0, total_general: sub, esquema_pago: document.getElementById('proy-fin-esquema').value, anticipo_monto: parseFloat(document.getElementById('proy-fin-anticipo').value), finiquito_monto: parseFloat(document.getElementById('proy-fin-finiquito').value), metodos_permitidos: document.getElementById('proy-fin-metodos').value.split(',') }
+    financiero: { moneda_base: document.getElementById('proy-fin-moneda').value, subtotal: sub, impuestos: 0, total_general: sub, esquema_pago: finalEsquema, anticipo_monto: parseFloat(document.getElementById('proy-fin-anticipo').value), finiquito_monto: parseFloat(document.getElementById('proy-fin-finiquito').value), metodos_permitidos: document.getElementById('proy-fin-metodos').value.split(',') }
   };
-  if(key) {
-    window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core/proyectos/' + key), obj);
-    logSystemAction('Modificación Célula Madre', 'Proyectos', obj.metadata.id_proyecto, obj);
-  } else {
-    window._fbSet(window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/proyectos')), obj);
-    logSystemAction('Creación Célula Madre', 'Proyectos', obj.metadata.id_proyecto, obj);
-  }
+  if(key) { window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core/proyectos/' + key), obj); }
+  else { window._fbSet(window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/proyectos')), obj); }
   closeModal('modal-proyecto');
 }
 function renderProyectosMaster() {
@@ -526,12 +572,13 @@ function renderProyectosMaster() {
   let html = `<table><thead><tr><th>Código Master</th><th>Cliente</th><th>Línea de Servicio</th><th>Total Presupuestado</th><th>Impresión Editorial</th></tr></thead><tbody>`;
   Object.keys(DB.proyectos).forEach(k => {
     const p = DB.proyectos[k];
-    html += `<tr><td><b>${p.metadata.id_proyecto}</b></td><td>${p.cliente.nombre_empresa}</td><td>${p.proyecto.linea_servicio}</td><td style="color:var(--green); font-weight:700">$${p.financiero.total_general}</td><td><button class="btn btn-primary btn-sm" onclick="openVisualizadorDocumentos('${k}')">📄 PDF Engine</button></td></tr>`;
+    const sign = p.financiero.moneda_base === 'EUR' ? '€' : '$';
+    html += `<tr><td><b>${p.metadata.id_proyecto}</b></td><td>${p.cliente.nombre_empresa}</td><td>${p.proyecto.linea_servicio}</td><td style="color:var(--green); font-weight:700">${sign}${p.financiero.total_general}</td><td><button class="btn btn-primary btn-sm" onclick="openVisualizadorDocumentos('${k}')">📄 PDF Engine</button></td></tr>`;
   });
   wrap.innerHTML = html + '</tbody></table>';
 }
 
-/* DOCS & PDF */
+/* PDF ENGINE */
 function openVisualizadorDocumentos(key) { activeProjectKeyForDoc = key; triggerTransformacionDoc('PROPUESTA'); openModal('modal-documento-output'); }
 function triggerTransformacionDoc(tipo) {
   const p = DB.proyectos[activeProjectKeyForDoc]; if(!p) return;
@@ -539,63 +586,49 @@ function triggerTransformacionDoc(tipo) {
   let title = "PROPUESTA DE SERVICIOS"; let cintillo = false; let maskPrice = false;
   if(tipo==='OS_INTERNA') { title = "ORDEN DE SERVICIO INTERNA"; maskPrice = true; }
   if(tipo==='PREFACTURA') { title = "PREFACTURA DE CONTROL FINANCIERO"; cintillo = true; }
+  const sign = p.financiero.moneda_base === 'EUR' ? '€' : '$';
 
   let body = `
     <div class="pdf-header"><div>${OIKOS_SVG_LOGO}<h4>OIKOS MEDIA</h4></div><div style="text-align:right"><h3>${title}</h3><h4 style="color:#6c63ff">${p.metadata.id_proyecto}</h4></div></div>
-    <div style="font-size:12px; margin-bottom:15px"><b>Empresa:</b> ${p.cliente.nombre_empresa} | <b>RIF:</b> ${p.cliente.rif_id}<br><b>Línea:</b> ${p.proyecto.linea_servicio} | <b>Locación:</b> ${p.proyecto.lugar}</div>
-    <table class="pdf-table"><thead><tr><th>Categoría</th><th>Concepto Entregable</th><th>Cant.</th>${!maskPrice?'<th>Total</th>':''}</tr></thead><tbody>`;
+    <div style="font-size:12px; margin-bottom:15px"><b>Empresa:</b> ${p.cliente.nombre_empresa} | <b>RIF:</b> ${p.cliente.rif_id}<br><b>Línea Real:</b> ${p.proyecto.linea_servicio} | <b>Contacto Enlace:</b> ${p.cliente.contacto}</div>
+    <table class="pdf-table"><thead><tr><th>Área / Cat.</th><th>Concepto Entregable</th><th>Cant.</th>${!maskPrice?'<th>Total</th>':''}</tr></thead><tbody>`;
   p.items.forEach(i => {
-    body += `<tr><td>${i.categoria}</td><td>${i.concepto}</td><td>${i.cantidad}</td>${!maskPrice?`<td>$${i.total}</td>`:''}</tr>`;
+    body += `<tr><td>${i.categoria}</td><td>${i.concepto}</td><td>${i.cantidad}</td>${!maskPrice?`<td>${sign}${i.total}</td>`:''}</tr>`;
   });
   body += `</tbody></table>`;
-  if(!maskPrice) body += `<div style="text-align:right; font-weight:700; font-size:14px; color:#6c63ff">Total General: $${p.financiero.total_general}</div>`;
+  if(!maskPrice) body += `<div style="text-align:right; font-weight:700; font-size:14px; color:#6c63ff">Total General: ${sign}${p.financiero.total_general}</div>`;
   if(cintillo) body += `<div class="pdf-cintillo-legal">DOCUMENTO EMITIDO EXCLUSIVAMENTE PARA CONTROL FINANCIERO INTERNO. NO POSEE VALIDEZ FISCAL.</div>`;
   lienzo.innerHTML = body;
 }
 function downloadPDFNative() { html2pdf().from(document.getElementById('print-lienzo-pdf')).save(`Oikos_Documento_${Date.now()}.pdf`); }
 
-/* ORDENES */
+/* LOGISTICA */
 function prepareNewOS() {
-  document.getElementById('os-id').value = ''; document.getElementById('os-cliente').value = '';
-  document.getElementById('os-desc').value = ''; document.getElementById('os-monto').value = ''; openModal('modal-os');
+  document.getElementById('os-id').value = ''; document.getElementById('os-cliente').value = ''; document.getElementById('os-desc').value = ''; document.getElementById('os-monto').value = ''; openModal('modal-os');
 }
 function saveOSAction() {
   const key = document.getElementById('os-id').value; const cliKey = document.getElementById('os-cliente').value; const respKey = document.getElementById('os-responsable').value;
   const obj = {
     clienteId: cliKey, clienteNombre: DB.clientes[cliKey]?.nombre || 'Externo',
-    servicio: document.getElementById('os-servicio').value, desc: document.getElementById('os-desc').value,
+    servicio: document.getElementById('os-servicio-select').value, desc: document.getElementById('os-desc').value,
     monto: parseFloat(document.getElementById('os-monto').value) || 0, estado: document.getElementById('os-estado').value,
     responsableId: respKey, responsableNombre: DB.personal[respKey]?.nombre || 'Sin asignar'
   };
-  if(key) {
-    window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core/ordenes/' + key), obj);
-    logSystemAction('Modificación Orden', 'Logística', obj.clienteNombre, obj);
-  } else {
-    window._fbSet(window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/ordenes')), obj);
-    logSystemAction('Creación Orden', 'Logística', obj.clienteNombre, obj);
-  }
+  if(key) { window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core/ordenes/' + key), obj); }
+  else { window._fbSet(window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/ordenes')), obj); }
   closeModal('modal-os');
 }
 function renderOrdenes() {
   const container = document.getElementById('os-list'); container.innerHTML = '';
   Object.keys(DB.ordenes).forEach(k => {
     const o = DB.ordenes[k];
-    container.innerHTML += `<div class="card" style="text-align:left"><b>#OS — ${o.clienteNombre}</b><br><span style="font-size:12px; color:var(--text2)">Línea: ${o.servicio} | Responsable: ${o.responsableNombre}</span><p style="font-size:13px; margin-top:6px">${o.desc}</p></div>`;
-  });
-}
-function renderKanban() {
-  const board = document.getElementById('kanban-board'); const frentes = ['pendiente', 'en_proceso', 'completado', 'cancelado'];
-  board.innerHTML = frentes.map(f => `<div class="kanban-col"><div class="kanban-col-title"><b>${f.toUpperCase()}</b></div><div id="col-k-${f}"></div></div>`).join('');
-  Object.keys(DB.ordenes).forEach(k => {
-    const o = DB.ordenes[k]; const col = document.getElementById('col-k-' + o.estado);
-    if(col) col.innerHTML += `<div class="kanban-card" style="text-align:left"><b>${o.clienteNombre}</b><br><span style="font-size:11px; color:var(--text2)">${o.servicio}</span></div>`;
+    container.innerHTML += `<div class="card"><b>#OS — ${o.clienteNombre}</b><br><span style="font-size:12px; color:var(--text2)">Línea Real: ${o.servicio} | Responsable: ${o.responsableNombre}</span><p style="font-size:13px; margin-top:6px">${o.desc}</p></div>`;
   });
 }
 
-/* GASTOS */
+/* CAJA */
 function prepareNewGasto() {
-  document.getElementById('gasto-id').value = ''; document.getElementById('gasto-concepto').value = '';
-  document.getElementById('gasto-monto').value = ''; document.getElementById('gasto-fecha').value = today(); openModal('modal-gasto');
+  document.getElementById('gasto-id').value = ''; document.getElementById('gasto-concepto').value = ''; document.getElementById('gasto-monto').value = ''; document.getElementById('gasto-fecha').value = today(); openModal('modal-gasto');
 }
 function saveGastoAction() {
   const id = document.getElementById('gasto-id').value;
@@ -603,18 +636,13 @@ function saveGastoAction() {
     concepto: document.getElementById('gasto-concepto').value.trim(), monto: parseFloat(document.getElementById('gasto-monto').value) || 0,
     fecha: document.getElementById('gasto-fecha').value, frecuencia: document.getElementById('gasto-frecuencia').value, proyectoVinculo: document.getElementById('gasto-proyecto-vinculo').value
   };
-  if(id) {
-    window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core/gastos/' + id), obj);
-    logSystemAction('Modificación Gasto', 'Finanzas', obj.concepto, obj);
-  } else {
-    window._fbSet(window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/gastos')), obj);
-    logSystemAction('Registro Gasto', 'Finanzas', obj.concepto, obj);
-  }
+  if(id) { window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core/gastos/' + id), obj); }
+  else { window._fbSet(window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/gastos')), obj); }
   closeModal('modal-gasto');
 }
 function renderGastos() {
   const wrap = document.getElementById('gastos-table-wrap'); wrap.innerHTML = '';
-  let html = `<table><thead><tr><th>Fecha</th><th>Glosa / Concepto</th><th>Frecuencia</th><th>Código Proyecto</th><th>Monto</th></tr></thead><tbody>`;
+  let html = `<table><thead><tr><th>Fecha Valor</th><th>Glosa / Concepto</th><th>Frecuencia</th><th>Código Proyecto</th><th>Monto USD</th></tr></thead><tbody>`;
   Object.keys(DB.gastos).forEach(k => {
     const g = DB.gastos[k];
     html += `<tr><td><b>${g.fecha}</b></td><td>${g.concepto}</td><td><span class="badge badge-amber">${g.frecuencia}</span></td><td><b>${g.proyectoVinculo || 'Estructura Fija'}</b></td><td style="color:var(--red); font-weight:700">-$${g.monto}</td></tr>`;
@@ -622,11 +650,9 @@ function renderGastos() {
   wrap.innerHTML = html + '</tbody></table>';
 }
 
-/* TEAM */
+/* STAFF */
 function prepareNewPersonal() {
-  document.getElementById('pers-id').value = ''; document.getElementById('pers-nombre').value = '';
-  document.getElementById('pers-cargo').value = ''; document.getElementById('pers-salario').value = 0;
-  document.getElementById('pers-aplica-com').value = 'no'; toggleComissionInputs(); openModal('modal-personal');
+  document.getElementById('pers-id').value = ''; document.getElementById('pers-nombre').value = ''; document.getElementById('pers-cargo').value = ''; document.getElementById('pers-salario').value = 0; document.getElementById('pers-aplica-com').value = 'no'; toggleComissionInputs(); openModal('modal-personal');
 }
 function savePersonalAction() {
   const id = document.getElementById('pers-id').value;
@@ -635,18 +661,13 @@ function savePersonalAction() {
     salario: parseFloat(document.getElementById('pers-salario').value) || 0, aplicaComision: document.getElementById('pers-aplica-com').value,
     comisionTipo: document.getElementById('pers-com-tipo').value, comisionPorcentaje: parseFloat(document.getElementById('pers-com-porc').value) || 0
   };
-  if(id) {
-    window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core/personal/' + id), obj);
-    logSystemAction('Edición Colaborador', 'Staff', obj.nombre, obj);
-  } else {
-    window._fbSet(window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/personal')), obj);
-    logSystemAction('Alta Staff', 'Staff', obj.nombre, obj);
-  }
+  if(id) { window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core/personal/' + id), obj); }
+  else { window._fbSet(window._fbPush(window._fbRef(window._fbDB, 'oikos_stable_core/personal')), obj); }
   closeModal('modal-personal');
 }
 function renderPersonal() {
   const wrap = document.getElementById('personal-table-wrap'); wrap.innerHTML = '';
-  let html = `<table><thead><tr><th>Especialista</th><th>Cargo / Rol</th><th>Sueldo Base</th><th>Esquema de Utilidad</th></tr></thead><tbody>`;
+  let html = `<table><thead><tr><th>Especialista</th><th>Cargo / Rol</th><th>Sueldo Base</th><th>Esquema</th></tr></thead><tbody>`;
   Object.keys(DB.personal).forEach(k => {
     const p = DB.personal[k];
     html += `<tr><td><b>${p.nombre}</b></td><td>${p.cargo}</td><td>$${p.salario}</td><td>${p.aplicaComision==='si' ? `<span class="badge badge-green">${p.comisionPorcentaje}% sobre Utilidad ${p.comisionTipo}</span>` : '<span style="color:var(--text2)">N/A</span>'}</td></tr>`;
@@ -656,14 +677,15 @@ function renderPersonal() {
 }
 function calcularYRenderizarComisionesAutomomaticas() {
   const wrap = document.getElementById('comisiones-auto-table-wrap'); wrap.innerHTML = '';
-  let html = `<table><thead><tr><th>Especialista</th><th>ID Proyecto</th><th>Línea Servicio</th><th>Base Imponible</th><th>Liquidación Auto</th></tr></thead><tbody>`;
+  let html = `<table><thead><tr><th>Especialista</th><th>ID Proyecto</th><th>Línea Real</th><th>Base Imponible USD</th><th>Liquidación</th></tr></thead><tbody>`;
   Object.keys(DB.personal).forEach(pKey => {
     const p = DB.personal[pKey];
     if(p.aplicaComision === 'si') {
       Object.keys(DB.proyectos).forEach(proyKey => {
         const proy = DB.proyectos[proyKey]; let costosDirectos = 0;
         Object.values(DB.gastos).forEach(g => { if(g.proyectoVinculo === proy.metadata.id_proyecto) costosDirectos += g.monto; });
-        let base = p.comisionTipo === 'bruta' ? proy.financiero.total_general : (proy.financiero.total_general - costosDirectos);
+        let totalUSD = proy.financiero.moneda_base === 'EUR' ? proy.financiero.total_general * 1.08 : proy.financiero.total_general;
+        let base = p.comisionTipo === 'bruta' ? totalUSD : (totalUSD - costosDirectos);
         let liq = base * (p.comisionPorcentaje / 100);
         if(liq > 0) html += `<tr><td><b>${p.nombre}</b></td><td><span class="chip">${proy.metadata.id_proyecto}</span></td><td>${proy.proyecto.linea_servicio}</td><td>$${base.toFixed(2)}</td><td style="color:var(--green); font-weight:700">+$${liq.toFixed(2)}</td></tr>`;
       });
@@ -672,98 +694,72 @@ function calcularYRenderizarComisionesAutomomaticas() {
   wrap.innerHTML = html + '</tbody></table>';
 }
 
-/* HISTORIAL DE CAMBIOS (LOG TRAIL) */
+/* LOGS */
 function renderAuditoria() {
   const wrap = document.getElementById('auditoria-table-wrap');
   let html = `<table><thead><tr><th>Fecha / Hora</th><th>Usuario Operador</th><th>Módulo</th><th>Acción Realizada</th></tr></thead><tbody>`;
-  Object.values(DB.auditoria || {}).reverse().slice(0,50).forEach(log => {
+  Object.values(DB.auditoria || {}).reverse().slice(0,40).forEach(log => {
     html += `<tr><td>${log.fecha} — ${log.hora}</td><td>${log.usuario}</td><td><span class="badge badge-amber">${log.modulo}</span></td><td><b>${log.accion}</b> — ${log.idItem}</td></tr>`;
   });
-  if(!Object.keys(DB.auditoria).length) html += `<tr><td colspan="4" style="color:var(--text2)">No hay logs registrados todavía.</td></tr>`;
   wrap.innerHTML = html + '</tbody></table>';
 }
 
-/* CORE REAL RENDERING ENGINE */
-function openTasaModal() {
-  document.getElementById('tasa-input').value = DB.tasa;
-  openModal('modal-tasa');
-}
+function openTasaModal() { document.getElementById('tasa-input').value = DB.tasa; openModal('modal-tasa'); }
 function saveTasa() {
   const v = parseFloat(document.getElementById('tasa-input').value);
-  if(v > 0) {
-    window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core'), { tasa: v });
-    logSystemAction('Actualización Tasa', 'Finanzas', `Nueva Tasa: Bs ${v}`, { tasa: v });
-    closeModal('modal-tasa');
-  }
+  if(v > 0) { window._fbUpdate(window._fbRef(window._fbDB, 'oikos_stable_core'), { tasa: v }); closeModal('modal-tasa'); }
 }
 
+/* REAL RESPONSIVE ANALYTICS ENGINE */
 let chartFlujoObj = null; let chartServicioObj = null;
 function renderDashboard() {
-  let ingresos = 0; let egresos = 0;
+  let ingresosUSD = 0; let egresosUSD = 0;
   
-  // Compilar montos puramente REALES de Firebase sin falsear datos
-  Object.values(DB.proyectos).forEach(p => ingresos += (p.financiero?.total_general || 0));
-  Object.values(DB.gastos).forEach(g => egresos += (g.monto || 0));
+  Object.values(DB.proyectos).forEach(p => {
+    // Si la propuesta está firmada en Euros, se normaliza dinámicamente a USD para contabilidad centralizada
+    let monto = p.financiero?.total_general || 0;
+    if(p.financiero?.moneda_base === 'EUR') monto = monto * 1.08; 
+    ingresosUSD += monto;
+  });
+  Object.values(DB.gastos).forEach(g => egresosUSD += (g.monto || 0));
 
-  // Inyección limpia de datos y BOTÓN PARA LA TASA VINCULADO
   document.getElementById('dash-stats').innerHTML = `
-    <div class="stat-card"><div class="stat-label">Ingresos Reales Cotizados</div><div class="stat-val green">$${ingresos.toFixed(2)}</div></div>
-    <div class="stat-card"><div class="stat-label">Gastos Reales Compilados</div><div class="stat-val red">$${egresos.toFixed(2)}</div></div>
-    <div class="stat-card"><div class="stat-label">Margen Utilidad Neta</div><div class="stat-val ${ingresos-egresos>=0?'green':'red'}">$${(ingresos-egresos).toFixed(2)}</div></div>
+    <div class="stat-card"><div class="stat-label">Ingresos Reales (USD)</div><div class="stat-val green">$${ingresosUSD.toFixed(2)}</div></div>
+    <div class="stat-card"><div class="stat-label">Gastos Compilados (USD)</div><div class="stat-val red">$${egresosUSD.toFixed(2)}</div></div>
+    <div class="stat-card"><div class="stat-label">Margen Utilidad Neta</div><div class="stat-val ${ingresosUSD-egresosUSD>=0?'green':'red'}">$${(ingresosUSD-egresosUSD).toFixed(2)}</div></div>
     <div class="stat-card">
-      <div class="stat-label">Tasa Centralizada</div>
-      <div class="stat-val amber" style="display:inline-block">Bs ${DB.tasa}</div>
+      <div class="stat-label">Tasa Centralizada</div><div class="stat-val amber">Bs ${DB.tasa}</div>
       <button class="btn btn-ghost btn-sm" onclick="openTasaModal()" style="position:absolute; top:16px; right:16px; padding:4px 8px; font-size:10px">Cambiar</button>
     </div>
   `;
 
-  // RENDERING DEL LIBRO DE CAJA DETALLADO (HISTÓRICO MONETARIO COMPLETO)
   const balanceDetalladoWrap = document.getElementById('dash-balance-detallado-table');
-  let balHtml = `<table><thead><tr><th>Fecha</th><th>Tipo de Flujo</th><th>Concepto / Glosa</th><th>Monto Original (USD)</th><th>Monto Equivalente Local</th></tr></thead><tbody>`;
-  
+  let balHtml = `<table><thead><tr><th>Fecha Valor</th><th>Tipo Flujo</th><th>Concepto / Identificador</th><th>Monto Conolidado USD</th><th>Monto Local VE</th></tr></thead><tbody>`;
   Object.values(DB.proyectos).forEach(p => {
-    balHtml += `<tr><td>${p.metadata.fecha_creacion}</td><td><span class="badge badge-green">Ingreso</span></td><td>Proyecto: ${p.proyecto.linea_servicio} (${p.metadata.id_proyecto})</td><td style="color:var(--green); font-weight:700">+$${p.financiero.total_general.toFixed(2)}</td><td style="color:var(--text2)">Bs ${(p.financiero.total_general * DB.tasa).toFixed(2)}</td></tr>`;
+    let u = p.financiero.moneda_base === 'EUR' ? p.financiero.total_general * 1.08 : p.financiero.total_general;
+    balHtml += `<tr><td>${p.metadata.fecha_creacion}</td><td><span class="badge badge-green">Ingreso</span></td><td>Proyecto: ${p.proyecto.linea_servicio} (${p.metadata.id_proyecto})</td><td style="color:var(--green); font-weight:700">+$${u.toFixed(2)}</td><td style="color:var(--text2)">Bs ${(u * DB.tasa).toFixed(2)}</td></tr>`;
   });
   Object.values(DB.gastos).forEach(g => {
     balHtml += `<tr><td>${g.fecha}</td><td><span class="badge badge-red">Egreso</span></td><td>Gasto: ${g.concepto}</td><td style="color:var(--red); font-weight:700">-$${g.monto.toFixed(2)}</td><td style="color:var(--text2)">Bs ${(g.monto * DB.tasa).toFixed(2)}</td></tr>`;
   });
-  if(!Object.keys(DB.proyectos).length && !Object.keys(DB.gastos).length) {
-    balHtml += `<tr><td colspan="5" style="color:var(--text2); text-align:center">Libro de caja vacío. No hay transacciones registradas.</td></tr>`;
-  }
   balanceDetalladoWrap.innerHTML = balHtml + '</tbody></table>';
 
   const tableCxp = document.getElementById('dash-cxp-table');
-  let cxpHtml = `<table><thead><tr><th>Gasto Item</th><th>Calendario Período</th><th>Monto</th></tr></thead><tbody>`;
-  Object.values(DB.gastos).slice(0,5).forEach(g => {
-    cxpHtml += `<tr><td>${g.concepto}</td><td><span class="badge badge-amber">${g.frecuencia}</span></td><td style="color:var(--red); font-weight:700">$${g.monto}</td></tr>`;
-  });
-  if(!Object.keys(DB.gastos).length) cxpHtml += `<tr><td colspan="3" style="color:var(--text2)">Sin cuentas por pagar.</td></tr>`;
+  let cxpHtml = `<table><thead><tr><th>Gasto Item</th><th>Período</th><th>Monto USD</th></tr></thead><tbody>`;
+  Object.values(DB.gastos).slice(0,5).forEach(g => { cxpHtml += `<tr><td>${g.concepto}</td><td><span class="badge badge-amber">${g.frecuencia}</span></td><td style="color:var(--red); font-weight:700">$${g.monto}</td></tr>`; });
   tableCxp.innerHTML = cxpHtml + '</tbody></table>';
 
   const listAct = document.getElementById('dash-cli-activos'); listAct.innerHTML = '';
   const listInact = document.getElementById('dash-cli-inactivos'); listInact.innerHTML = '';
-  Object.values(DB.clientes).forEach(c => {
-    const li = `<li>• ${c.nombre}</li>`;
-    if(c.estado === 'inactivo') listInact.innerHTML += li; else listAct.innerHTML += li;
-  });
-  if(!Object.keys(DB.clientes).length) listAct.innerHTML = '<li>Sin clientes.</li>';
+  Object.values(DB.clientes).forEach(c => { if(c.estado === 'inactivo') listInact.innerHTML += `<li>• ${c.nombre}</li>`; else listAct.innerHTML += `<li>• ${c.nombre}</li>`; });
 
-  // Gráficos puros vinculados de forma real a las variables monetarias
   const ctxF = document.getElementById('chart-flujo').getContext('2d');
   if(chartFlujoObj) chartFlujoObj.destroy();
-  chartFlujoObj = new Chart(ctxF, {
-    type: 'bar',
-    data: { labels: ['Ingresos Reales', 'Egresos Reales'], datasets: [{ data: [ingresos, egresos], backgroundColor: ['rgba(34,197,94,.85)','rgba(239,68,68,.85)'] }] },
-    options: { maintainAspectRatio:false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-  });
+  chartFlujoObj = new Chart(ctxF, { type: 'bar', data: { labels: ['Ingresos (USD)', 'Egresos (USD)'], datasets: [{ data: [ingresosUSD, egresosUSD], backgroundColor: ['rgba(34,197,94,.8)','rgba(239,68,68,.8)'] }] }, options: { maintainAspectRatio:false, plugins: { legend: { display: false } } } });
 
   const ctxS = document.getElementById('chart-servicios-rent').getContext('2d');
   if(chartServicioObj) chartServicioObj.destroy();
-  chartServicioObj = new Chart(ctxS, {
-    type: 'doughnut',
-    data: { labels: ['Pipeline Operaciones'], datasets: [{ data: [ingresos > 0 ? ingresos : 0.001], backgroundColor: ['#6c63ff'] }] },
-    options: { maintainAspectRatio:false, plugins: { legend: { display: false } } }
-  });
+  chartServicioObj = new Chart(ctxS, { type: 'doughnut', data: { labels: ['Pipeline Real'], datasets: [{ data: [ingresosUSD > 0 ? ingresosUSD : 0.001], backgroundColor: ['#6c63ff'] }] }, options: { maintainAspectRatio:false, plugins: { legend: { display: false } } } });
 }
 </script>
 </body>
